@@ -1,0 +1,661 @@
+/* =================================
+		   VARIABLES ET BASE
+		   ================================= */
+:root{
+	--sapin: #0f3d2e;
+	--sapin-2: #14543f;
+	--text: #1f2937;
+	--muted: #6b7280;
+	--border: #e5e7eb;
+	--bg: #fafbfb;
+	--shadow: 0 8px 24px rgba(17,24,39,.06);
+	--shadow-lg: 0 20px 40px rgba(17,24,39,.12);
+}
+
+html, body{
+	background: var(--bg);
+	color: var(--text);
+	font-size: 18px;
+}
+
+.text-muted{
+	color: var(--muted) !important;
+}
+
+[id]{
+	scroll-margin-top: 90px;
+}
+
+/* =================================
+   BOUTONS
+   ================================= */
+.btn-sapin{
+	background: var(--sapin);
+	border-color: var(--sapin);
+	color: #fff;
+	border-radius: 999px;
+	padding: .85rem 1.5rem;
+	font-weight: 650;
+	font-size: 1.1rem;
+	box-shadow: 0 4px 12px rgba(15,61,46,.2);
+}
+.btn-sapin:hover{
+	background: var(--sapin-2);
+	border-color: var(--sapin-2);
+	color: #fff;
+}
+
+.btn-outline-sapin{
+	border-color: var(--sapin);
+	color: var(--sapin);
+	border-radius: 999px;
+	padding: .85rem 1.5rem;
+	font-weight: 650;
+	font-size: 1.1rem;
+	border-width: 2px;
+}
+.btn-outline-sapin:hover{
+	background: var(--sapin);
+	color: #fff;
+}
+
+.btn-link-sapin{
+	border-color: transparent;
+	color: var(--sapin);
+	border-radius: 999px;
+	/*padding: .85rem 1.5rem;*/
+	font-weight: 650;
+	font-size: 1.1rem;
+	border-width: 2px;
+	padding: .85rem 0;
+}
+.btn-link-sapin:hover{
+	color: #262626;
+}
+
+/* =================================
+   NAVIGATION
+   ================================= */
+/* Navigation sticky (apparaît au scroll) */
+.sticky-nav{
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	z-index: 999;
+	background: rgba(255,255,255,.94);
+	backdrop-filter: blur(10px);
+	border-bottom: 1px solid var(--border);
+	transform: translateY(-110%);
+	transition: transform .25s ease;
+}
+
+.sticky-nav.show{
+	transform: translateY(0);
+}
+
+.sticky-nav .navbar-brand{
+	color: var(--sapin) !important;
+	font-weight: 800;
+	letter-spacing: .2px;
+	font-size: 1.15rem;
+	display: flex;
+	align-items: center;
+	gap: .6rem;
+}
+
+.sticky-nav .navbar-brand img{
+	height: 48px;
+	width: 48px;
+	border-radius: 10px;
+	object-fit: cover;
+}
+
+.sticky-nav .navbar-brand .logoMark{
+	width: 28px;
+	height: 28px;
+	border-radius: 10px;
+	background: rgba(15,61,46,.12);
+	border: 1px solid rgba(15,61,46,.18);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-weight: 900;
+	color: var(--sapin);
+}
+
+.sticky-nav .nav-link{
+	color: var(--text) !important;
+	font-weight: 650;
+	font-size: 1.05rem;
+}
+
+.sticky-nav .nav-link:hover{
+	color: var(--sapin) !important;
+}
+
+/* =================================
+   HERO / BANNIERE
+   ================================= */
+.hero{
+	position: relative;
+	min-height: 52vh;
+	display: flex;
+	align-items: center;
+	overflow: hidden;
+	border-bottom: 1px solid var(--border);
+}
+
+.hero::before{
+	content: "";
+	position: absolute;
+	inset: 0;
+	background:
+			linear-gradient(90deg, rgba(255,255,255,.85) 0%, rgba(255,255,255,.65) 44%, rgba(255,255,255,.25) 72%, rgba(255,255,255,.1) 100%),
+			var(--hero-image) center center/cover no-repeat;
+	transform: scale(1.02);
+}
+
+.hero > .container{
+	position: relative;
+	z-index: 1;
+}
+
+body:not(.is-sticky) .hero h1{
+	font-size: clamp(3rem, 4.5vw, 4rem);
+	line-height: 1.1;
+}
+
+/* Logo hero en position absolute */
+.hero-logo-corner{
+	position: absolute;
+	top: 40px;
+	left: 40px;
+	z-index: 3;
+}
+
+.hero-logo-corner img{
+	width: 16vh;
+}
+
+/* Titre marque "Les clés du Capcir" */
+.brand-title{
+	font-family: 'Montserrat', sans-serif;
+	font-size: 2.75rem;
+	font-weight: bold;
+	color: #0f3d2e;
+	text-shadow: 0 2px 8px rgba(0,0,0,.2);
+	/*font-style: italic;*/
+	letter-spacing: 0.5px;
+}
+
+/* Hero content avec padding left */
+.hero-content{
+	padding-left: 6rem;
+}
+
+/* Navigation intégrée dans le hero */
+.hero-nav{
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	z-index: 2;
+	padding: 18px 0;
+	background: linear-gradient(180deg, rgba(15,61,46,.6) 0%, transparent 100%);
+}
+
+.hero-nav .nav-link{
+	color: #e8f4f1;
+	font-weight: 700;
+	font-size: 1.25rem;
+	text-shadow: 0 1px 2px rgba(0,0,0,.3);
+}
+
+.hero-nav .nav-link:hover{
+	color: #fff;
+	text-decoration: underline;
+	text-underline-offset: 6px;
+}
+
+.hero-nav .brand{
+	color: #fff;
+	font-weight: 800;
+	letter-spacing: .2px;
+	text-decoration: none;
+	display: flex;
+	align-items: center;
+	gap: .8rem;
+	text-shadow: 0 2px 8px rgba(0,0,0,.4);
+}
+
+.hero-nav .brand img{
+	width: 50px;
+	height: 50px;
+	border-radius: 12px;
+	object-fit: cover;
+	box-shadow: 0 2px 8px rgba(0,0,0,.3);
+}
+
+.hero-nav .brand .logoMark{
+	width: 28px;
+	height: 28px;
+	border-radius: 10px;
+	background: rgba(255,255,255,.18);
+	border: 1px solid rgba(255,255,255,.28);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-weight: 900;
+}
+
+.hero-nav .btn-ghost{
+	border: 2px solid #e8f4f1;
+	color: #e8f4f1;
+	border-radius: 999px;
+	padding: .75rem 1.4rem;
+	font-size: 1.25rem;
+	font-weight: 700;
+	background: rgba(255,255,255,.15);
+	backdrop-filter: blur(12px);
+	text-shadow: 0 1px 2px rgba(0,0,0,.3);
+	text-decoration: none !important;
+}
+
+.hero-nav .btn-ghost:hover{
+	background: rgba(255,255,255,.25);
+	border-color: #e8f4f1;
+	color: #e8f4f1;
+	text-decoration: none !important;
+}
+
+/* Hamburger menu mobile */
+.hero-nav .navbar-toggler{
+	border: 2px solid #e8f4f1;
+	background: rgba(255,255,255,.15);
+	backdrop-filter: blur(12px);
+	padding: .5rem .75rem;
+}
+
+.hero-nav .navbar-toggler-icon{
+	background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(232, 244, 241, 1)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+	width: 24px;
+	height: 24px;
+}
+
+.hero-nav .navbar-collapse{
+	background: rgba(15,61,46,.95);
+	backdrop-filter: blur(12px);
+	margin-top: 1rem;
+	border-radius: 12px;
+	padding: 0 1rem;
+}
+
+.hero-nav .navbar-collapse .nav-link{
+	padding: .75rem 1rem;
+	text-align: center;
+}
+
+/* =================================
+   SERVICES
+   ================================= */
+.service-card{
+	background: #fff;
+	border-radius: 18px;
+	padding: 36px 20px;
+	text-align: center;
+	box-shadow: var(--shadow);
+	border: 1px solid var(--border);
+	transition: all 0.3s ease;
+	height: 100%;
+}
+
+.service-card:hover{
+	transform: scale(1.05);
+}
+
+.service-box{
+	display: flex;
+	flex-direction: column;
+	gap: 18px;
+	align-items: center;
+	justify-content: center;
+	font-size: 1.05rem;
+}
+
+.service-box .service-icon{
+	width: 90px;
+	height: 90px;
+	border-radius: 50%;
+	background: linear-gradient(135deg, var(--sapin) 0%, var(--sapin-2) 100%);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: #fff;
+	box-shadow: 0 8px 24px rgba(15,61,46,.25);
+}
+
+.service-box .service-icon i{
+	font-size: 40px;
+}
+
+/* =================================
+   SECTIONS ET TITRES
+   ================================= */
+section{
+	margin: 50px 0;
+}
+
+.section-title{
+	font-weight: 850;
+	letter-spacing: .2px;
+	font-size: 2rem;
+	margin-bottom: 0;
+	color: var(--sapin);
+}
+
+/* =================================
+   LISTINGS / CARTES BIENS
+   ================================= */
+.listing{
+	border: 1px solid var(--border);
+	border-radius: 18px;
+	overflow: hidden;
+	background: #fff;
+	box-shadow: var(--shadow);
+	height: 100%;
+}
+
+.listing img{
+	width: 100%;
+	height: 220px;
+	object-fit: cover;
+	transition: transform 0.3s ease;
+}
+
+.listing:hover img{
+	transform: scale(1.1);
+}
+
+.listing .body{
+	padding: 22px;
+	font-size: 1.05rem;
+}
+
+.listing .btn-sm{
+	padding: .5rem 1rem;
+	font-size: 0.95rem;
+}
+
+/* Colonnes Ventes & Locations */
+.biens-row{
+	--bs-gutter-x: 2rem;
+}
+
+.vente-col{
+	background: linear-gradient(135deg, var(--sapin) 0%, #1a6849 100%);
+	border-radius: 24px;
+	padding: 40px 36px;
+	box-shadow: 0 12px 32px rgba(15,61,46,.25);
+}
+
+.vente-col .section-title{
+	color: #fff !important;
+}
+
+.vente-col .listing{
+	border: 1px solid rgba(255,255,255,.15);
+	background: rgba(255,255,255,.95);
+}
+
+.vente-col .btn-outline-sapin{
+	border-color: var(--sapin) !important;
+	color: var(--sapin) !important;
+	background: #fff !important;
+}
+
+.vente-col .btn-outline-sapin:hover{
+	background: var(--sapin) !important;
+	color: #fff !important;
+}
+
+.vente-col .btn-details{
+	color: var(--sapin) !important;
+	background: #fff !important;
+}
+
+.vente-col .link-voir-tout{
+	color: #fff;
+	font-weight: 800;
+}
+
+.location-col{
+	background: transparent;
+	border: 2px solid var(--border);
+	border-radius: 24px;
+	padding: 40px 36px;
+}
+
+.location-col .link-voir-tout{
+	color: var(--sapin);
+	font-weight: 800;
+}
+
+/* =================================
+   FORMULAIRES
+   ================================= */
+.form-control,
+.form-select{
+	border-radius: 12px;
+	padding: .75rem 1rem;
+	font-size: 1.05rem;
+	border: 2px solid var(--border);
+	transition: all 0.3s ease;
+}
+
+.form-control:focus,
+.form-select:focus{
+	border-color: var(--sapin);
+	box-shadow: 0 0 0 3px rgba(15,61,46,.1);
+}
+
+.contact-form-container{
+	box-shadow: var(--shadow);
+	max-width: 900px;
+	margin: 0 auto;
+}
+
+/* =================================
+   FOOTER
+   ================================= */
+footer{
+	background: linear-gradient(135deg, #0f3d2e 0%, #14543f 100%);
+	padding: 30px 0 15px 0;
+	color: #fff;
+}
+
+footer h5,
+footer h6{
+	color: #fff !important;
+	font-weight: 800;
+	margin-bottom: 1.5rem;
+}
+
+footer .text-muted{
+	color: rgba(255,255,255,.8) !important;
+}
+
+footer a{
+	color: rgba(255,255,255,.9);
+	transition: color 0.3s ease;
+}
+
+footer a:hover{
+	color: #fff;
+}
+
+footer .footer-social-icon{
+	display: inline-block;
+	color: rgba(255,255,255,.8);
+	transition: all 0.3s ease;
+}
+
+footer .footer-social-icon:hover{
+	color: #fff;
+	transform: scale(1.1);
+}
+
+footer .footer-social-icon i{
+	font-size: 32px;
+}
+
+footer .footer-contact-item{
+	/*display: flex;*/
+	align-items: center;
+	gap: 10px;
+	margin-bottom: 12px;
+	color: rgba(255,255,255,.9);
+}
+
+footer .footer-contact-item i{
+	font-size: 18px;
+	width: 24px;
+}
+
+footer a.link-underlined {
+	margin: 0 10px;
+	text-decoration: underline;
+	text-underline-offset: 2px;
+}
+
+footer .border-top{
+	border-top: 1px solid rgba(255,255,255,.2) !important;
+	padding-top: 20px;
+	margin-top: 20px;
+}
+
+.footer-logo{
+	height: 70px;
+	margin-bottom: 5px;
+}
+
+.footer-heading-alt{
+	color: var(--sapin);
+}
+
+/* =================================
+   RESPONSIVE / MEDIA QUERIES
+   ================================= */
+@media (max-width: 991.98px) {
+	/* Hero mobile */
+	.hero-logo-corner{
+		top: 20px;
+		left: 20px;
+	}
+
+	.hero-logo-corner img{
+		width: 80px;
+		height: 80px;
+	}
+
+	.hero-content{
+		padding-left: 0;
+		padding-top: 2rem;
+	}
+
+	.brand-title{
+		font-size: 1.75rem;
+	}
+
+	body:not(.is-sticky) .hero h1{
+		font-size: clamp(1.75rem, 7vw, 2.5rem);
+	}
+
+	/* Sections spacing */
+	section{
+		margin: 20px 0;
+	}
+}
+
+@media (max-width: 767.98px) {
+	/* Footer mobile - centrer tout */
+	footer .row > div{
+		text-align: center !important;
+	}
+
+	footer .d-flex.flex-column{
+		align-items: center;
+	}
+
+	.footer-logo{
+		height: 60px;
+	}
+
+	/* Copyright et liens sur mobile */
+	footer .border-top .d-flex{
+		flex-direction: column !important;
+		align-items: center !important;
+		justify-content: center !important;
+		text-align: center !important;
+		gap: 0 !important;
+	}
+
+	/* Boutons hero - meilleure disposition mobile */
+	.hero .d-flex.flex-wrap{
+		justify-content: center;
+	}
+
+	.btn-sapin,
+	.btn-outline-sapin{
+		font-size: 1rem;
+		padding: .75rem 1.25rem;
+	}
+
+	/* Services - espacement réduit */
+	.service-card{
+		padding: 24px 16px;
+	}
+
+	.service-box .service-icon{
+		width: 70px;
+		height: 70px;
+	}
+
+	.service-box .service-icon i{
+		font-size: 32px;
+	}
+
+	.vente-col, .location-col {
+		padding: 20px 20px;
+	}
+
+	.hero-content {
+		text-align: center;
+	}
+}
+
+@media (max-width: 575.98px) {
+	/* Hero très petit mobile */
+	.hero{
+		min-height: 60vh;
+	}
+
+	.brand-title{
+		font-size: 1.5rem;
+	}
+
+	/* Navigation hero - ajustements */
+	.hero-nav .btn-ghost{
+		padding: .6rem 1rem;
+		font-size: 1rem;
+	}
+
+	/* Textes plus petits */
+	html, body{
+		font-size: 16px;
+	}
+
+	.section-title{
+		font-size: 1.5rem;
+	}
+}
