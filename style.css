@@ -166,12 +166,12 @@ body:not(.is-sticky) .hero h1{
 	line-height: 1.1;
 }
 
-/* Logo hero en position absolute */
+/* Logo hero aligné avec le texte */
 .hero-logo-corner{
-	position: absolute;
-	top: 40px;
-	left: 40px;
+	position: relative;
 	z-index: 3;
+	margin-bottom: 1.5rem;
+	margin-left: 4rem;
 }
 
 .hero-logo-corner img{
@@ -191,7 +191,7 @@ body:not(.is-sticky) .hero h1{
 
 /* Hero content avec padding left */
 .hero-content{
-	padding-left: 6rem;
+	/*padding-left: 6rem;*/
 }
 
 /* Navigation intégrée dans le hero */
@@ -552,11 +552,19 @@ footer .border-top{
 		top: 20px;
 		left: 20px;
 	}
-
+	/* Logo hero en position absolute */
+	.hero-logo-corner{
+		position: absolute;
+		top: 40px;
+		left: 40px;
+		z-index: 3;
+		margin-left: 0;
+	}
 	.hero-logo-corner img{
 		width: 80px;
 		height: 80px;
 	}
+
 
 	.hero-content{
 		padding-left: 0;

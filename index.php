@@ -94,14 +94,14 @@
 	<div class="container">
 		<div class="row">
 			<div class="col-lg-8 col-xl-9 hero-content">
-				<div class="brand-title mb-1">
+				<div class="brand-title mb-2">
 					Les clés du Capcir
 				</div>
 				<h1 class="display-5 fw-bold mb-4">
 					Vente & Conciergerie<br>
 					Au cœur du Capcir
 				</h1>
-				<div class="d-flex flex-wrap gap-3 align-items-center">
+				<div class="d-flex flex-wrap gap-3 align-items-center pt-3">
 					<a href="reserver.html" class="btn btn-sapin">Réserver maintenant</a>
 					<a href="vente.html" class="btn btn-outline-sapin">Biens en vente</a>
 					<a href="#contact" class="btn btn-link-sapin btn-contact-arrow">
