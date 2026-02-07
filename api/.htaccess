@@ -1,0 +1,14 @@
+# Protection du dossier admin
+# Désactivé par défaut - décommentez pour activer la protection supplémentaire
+
+# Bloquer l'accès aux fichiers sensibles
+<FilesMatch "\.(json|md)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Autoriser seulement les fichiers PHP et JS nécessaires
+# <Files ~ "^(index|login|logout|api|admin.js)">
+#     Order allow,deny
+#     Allow from all
+# </Files>

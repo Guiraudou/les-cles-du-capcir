@@ -1,32 +1,13 @@
-<!doctype html>
-<html lang="fr">
-<head>
-	<meta charset="utf-8" />
-	<meta name="viewport" content="width=device-width, initial-scale=1" />
-	<title>Capcir — Vente & Conciergerie</title>
-
-	<!-- Bootstrap 5 -->
-	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-
-	<link rel="stylesheet" href="style.css">
-
-	<!-- Google Fonts -->
-	<link rel="preconnect" href="https://fonts.googleapis.com">
-	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-	<link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,600;1,400&display=swap" rel="stylesheet">
-
-	<!-- Font Awesome 6 -->
-	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-
-</head>
-
-<body>
+<?php
+require_once 'includes/config.php';
+?>
+<?php require_once 'header.inc.php'; ?>
 
 <!-- Sticky header (appears on scroll) -->
 <nav id="stickyNav" class="navbar navbar-expand-lg sticky-nav">
 	<div class="container py-1">
 		<a class="navbar-brand" href="#top">
-			<img src="logo.png" alt="Les clés du Capcir">
+			<img src="data/logo.png" alt="Les clés du Capcir">
 			Les clés du Capcir
 		</a>
 
@@ -41,7 +22,7 @@
 				<li class="nav-item"><a class="nav-link" href="#biens">Biens</a></li>
 				<li class="nav-item"><a class="nav-link" href="#contact">Contact</a></li>
 				<li class="nav-item ms-lg-2">
-					<a class="btn btn-sapin" href="reserver.html">Réserver</a>
+					<a class="btn btn-sapin" href="#" data-bs-toggle="modal" data-bs-target="#modal_booking">Réserver</a>
 				</li>
 			</ul>
 		</div>
@@ -53,7 +34,7 @@
 
 	<!-- Logo en haut à gauche -->
 	<div class="hero-logo-corner">
-		<img src="logo.png" alt="Les clés du Capcir">
+		<img src="data/logo.png" alt="Les clés du Capcir">
 	</div>
 
 	<!-- integrated menu in hero -->
@@ -66,7 +47,7 @@
 				<a class="nav-link" href="#services">Services</a>
 				<a class="nav-link" href="#biens">Biens</a>
 				<a class="nav-link" href="#contact">Contact</a>
-				<a class="btn-ghost" href="reserver.html">Réserver</a>
+				<a class="btn-ghost" href="#" data-bs-toggle="modal" data-bs-target="#modal_booking">Réserver</a>
 			</div>
 
 			<!-- mobile toggle hamburger -->
@@ -84,7 +65,7 @@
 					<li class="nav-item"><a class="nav-link" href="#biens">Biens</a></li>
 					<li class="nav-item"><a class="nav-link" href="#contact">Contact</a></li>
 					<li class="nav-item mt-2">
-						<a class="btn-ghost" href="reserver.html">Réserver</a>
+						<a class="btn-ghost" href="#" data-bs-toggle="modal" data-bs-target="#modal_booking">Réserver</a>
 					</li>
 				</ul>
 			</div>
@@ -102,7 +83,7 @@
 					Au cœur du Capcir
 				</h1>
 				<div class="d-flex flex-wrap gap-3 align-items-center pt-3">
-					<a href="reserver.html" class="btn btn-sapin">Réserver maintenant</a>
+					<a href="#" data-bs-toggle="modal" data-bs-target="#modal_booking" class="btn btn-sapin">Réserver maintenant</a>
 					<a href="vente.html" class="btn btn-outline-sapin">Biens en vente</a>
 					<a href="#contact" class="btn btn-link-sapin btn-contact-arrow">
 						Nous contacter →
@@ -253,7 +234,7 @@
 									<div class="text-muted small mb-3">Les Angles • 3 chambres • Parking</div>
 									<div class="d-flex gap-2">
 										<a class="btn btn-outline-sapin btn-sm" href="locations.html">Détails</a>
-										<a class="btn btn-sapin btn-sm" href="reserver.html">Réserver</a>
+										<a class="btn btn-sapin btn-sm" href="#" data-bs-toggle="modal" data-bs-target="#modal_booking">Réserver</a>
 									</div>
 								</div>
 							</div>
@@ -267,7 +248,7 @@
 									<div class="text-muted small mb-3">Font-Romeu • 2 chambres • Balcon</div>
 									<div class="d-flex gap-2">
 										<a class="btn btn-outline-sapin btn-sm" href="locations.html">Détails</a>
-										<a class="btn btn-sapin btn-sm" href="reserver.html">Réserver</a>
+										<a class="btn btn-sapin btn-sm" href="#" data-bs-toggle="modal" data-bs-target="#modal_booking">Réserver</a>
 									</div>
 								</div>
 							</div>
@@ -281,7 +262,7 @@
 									<div class="text-muted small mb-3">Matemale • Wifi • Proche nature</div>
 									<div class="d-flex gap-2">
 										<a class="btn btn-outline-sapin btn-sm" href="locations.html">Détails</a>
-										<a class="btn btn-sapin btn-sm" href="reserver.html">Réserver</a>
+										<a class="btn btn-sapin btn-sm" href="#" data-bs-toggle="modal" data-bs-target="#modal_booking">Réserver</a>
 									</div>
 								</div>
 							</div>
@@ -302,35 +283,42 @@
 
 		<div class="listing contact-form-container">
 			<div class="body p-4">
-				<form onsubmit="return false;">
+				<form id="contactForm" method="post">
 					<div class="row g-3">
 						<div class="col-md-6">
-							<label class="form-label">Nom</label>
-							<input class="form-control" type="text" placeholder="Votre nom">
+							<label class="form-label" for="nom">Nom <span class="text-danger">*</span></label>
+							<input class="form-control" type="text" id="nom" name="nom" placeholder="Votre nom" required>
 						</div>
 						<div class="col-md-6">
-							<label class="form-label">Email</label>
-							<input class="form-control" type="email" placeholder="vous@email.fr">
+							<label class="form-label" for="email">Email <span class="text-danger">*</span></label>
+							<input class="form-control" type="email" id="email" name="email" placeholder="vous@email.fr" required>
 						</div>
 						<div class="col-md-6">
-							<label class="form-label">Téléphone (optionnel)</label>
-							<input class="form-control" type="tel" placeholder="+33 ...">
+							<label class="form-label" for="telephone">Téléphone (optionnel)</label>
+							<input class="form-control" type="tel" id="telephone" name="telephone" placeholder="+33 ...">
 						</div>
 						<div class="col-md-6">
-							<label class="form-label">Sujet</label>
-							<select class="form-select">
-								<option>Vente</option>
-								<option>Location</option>
-								<option>Conciergerie</option>
+							<label class="form-label" for="sujet">Sujet <span class="text-danger">*</span></label>
+							<select class="form-select" id="sujet" name="sujet" required>
+								<option value="">Choisissez un sujet</option>
+								<option value="Vente">Vente</option>
+								<option value="Location">Location</option>
+								<option value="Conciergerie">Conciergerie</option>
+								<option value="Autre">Autre</option>
 							</select>
 						</div>
 						<div class="col-12">
-							<label class="form-label">Message</label>
-							<textarea class="form-control" rows="4" placeholder="Décrivez votre demande..."></textarea>
+							<label class="form-label" for="message">Message <span class="text-danger">*</span></label>
+							<textarea class="form-control" id="message" name="message" rows="4" placeholder="Décrivez votre demande..." required></textarea>
 						</div>
+						<!-- Honeypot anti-spam (caché) -->
+						<input type="text" name="honeypot" style="display:none;" tabindex="-1" autocomplete="off">
 						<div class="col-12 text-center">
-							<button class="btn btn-sapin" type="submit" onclick="fakeSend()">Envoyer</button>
-							<div id="formStatus" class="text-muted small mt-2"></div>
+							<button class="btn btn-sapin" type="submit" id="submitBtn">
+								<span id="btnText">Envoyer</span>
+								<span id="btnSpinner" class="spinner-border spinner-border-sm ms-2 d-none" role="status" aria-hidden="true"></span>
+							</button>
+							<div id="formStatus" class="mt-2"></div>
 						</div>
 					</div>
 				</form>
@@ -362,7 +350,7 @@
 
 			<!-- Colonne 2 : Logo et titre (centre) -->
 			<div class="col-12 col-md-4 text-center order-1 order-md-2">
-				<img src="logo_white.png" alt="Les clés du Capcir" class="footer-logo">
+				<img src="data/logo_white.png" alt="Les clés du Capcir" class="footer-logo">
 				<h5 class="fw-bold mb-2">Les clés du Capcir</h5>
 				<p class="text-muted small mb-3">Vente & Conciergerie au cœur du Capcir</p>
 				
@@ -393,6 +381,7 @@
 						<div class="text-muted">© <span id="year"></span> Tous droits réservés</div>
 						<a href="#" class="link-underlined text-muted">Mentions légales</a>
 						<a href="#" class="link-underlined text-muted">Confidentialité</a>
+						<a href="#" class="link-underlined text-muted" data-bs-toggle="modal" data-bs-target="#modalLogin">Administration</a>
 					</div>
 				</div>
 			</div>
@@ -401,42 +390,36 @@
 	</div>
 </footer>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-	// Image demandée: ciel bleu + chalet + montagnes enneigées
-	// Remplace par ta propre image si tu en as une. Celle-ci correspond à l'esprit demandé.
-	const HERO_IMAGE =
-		"home.webp";
-		//"https://images.unsplash.com/photo-1578309830739-6226cb317b22?auto=format&fit=crop&q=80&w=1740";
+<!-- Modal Connexion Admin -->
+<div class="modal fade" id="modalLogin" tabindex="-1" aria-labelledby="modalLoginLabel" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="modalLoginLabel">
+					<i class="fa-solid fa-user-lock"></i> Administration
+				</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+			</div>
+			<div class="modal-body">
+				<div id="login-alert"></div>
+				<form id="loginForm">
+					<div class="mb-3">
+						<label for="login-username" class="form-label">Nom d'utilisateur</label>
+						<input type="text" class="form-control" id="login-username" name="username" required autofocus>
+					</div>
+					<div class="mb-3">
+						<label for="login-password" class="form-label">Mot de passe</label>
+						<input type="password" class="form-control" id="login-password" name="password" required>
+					</div>
+					<button type="submit" class="btn btn-success w-100">
+						<i class="fa-solid fa-right-to-bracket"></i> Se connecter
+					</button>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
 
-	function setHeroImage() {
-		const hero = document.querySelector(".hero");
-		hero.style.setProperty("--hero-image", `url('${HERO_IMAGE}')`);
-	}
+<?php include 'booking.inc.php'; ?>
 
-	function fakeSend(){
-		const el = document.getElementById("formStatus");
-		el.textContent = "Message prêt à envoyer (à brancher sur un backend / email).";
-		setTimeout(()=> el.textContent = "", 3500);
-	}
-
-	// Sticky menu appears after scrolling past hero a bit
-	function handleStickyNav(){
-		const sticky = document.getElementById("stickyNav");
-		const y = window.scrollY || document.documentElement.scrollTop;
-		if (y > 120){
-			sticky.classList.add("show");
-			document.body.classList.add("is-sticky");
-		} else {
-			sticky.classList.remove("show");
-			document.body.classList.remove("is-sticky");
-		}
-	}
-
-	document.getElementById("year").textContent = new Date().getFullYear();
-	setHeroImage();
-	handleStickyNav();
-	window.addEventListener("scroll", handleStickyNav);
-</script>
-</body>
-</html>
+<?php require_once 'footer.inc.php'; ?>
