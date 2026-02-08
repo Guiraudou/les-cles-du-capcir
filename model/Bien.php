@@ -222,7 +222,7 @@ class Bien
 	 */
 	public function uploadImages(array $files, int $bienId): array
 	{
-		$uploadDir = __DIR__ . '/../../uploads/biens/';
+		$uploadDir = UPLOADS_DIR;
 
 		if (!file_exists($uploadDir)) {
 			mkdir($uploadDir, 0755, true);
@@ -272,7 +272,7 @@ class Bien
 	 */
 	private function deleteImageFile(string $filename): void
 	{
-		$imagePath = __DIR__ . '/../../uploads/biens/' . $filename;
+		$imagePath = UPLOADS_DIR . $filename;
 		if (file_exists($imagePath)) {
 			unlink($imagePath);
 		}

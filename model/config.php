@@ -25,7 +25,9 @@ define('SITE_NAME', 'Les clés du Capcir');
 define('SITE_URL', 'https://www.votresite.com');
 
 // Chemins uploads
-define('UPLOADS_PATH', 'uploads/biens/');
+define('UPLOADS_PATH', 'uploads/biens/'); // Chemin relatif pour l'affichage
+define('UPLOADS_DIR', __DIR__ . '/../uploads/biens/'); // Chemin absolu pour l'enregistrement
+define('MAX_IMAGES_UPLOAD', 10); // Nombre maximum d'images par bien
 
 // Configuration Smoobu
 define('SMOOBU_API_KEY', ''); // À renseigner avec votre clé API Smoobu

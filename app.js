@@ -447,7 +447,16 @@ function handleFiles(files, form) {
 
 	// Ajouter les fichiers à la liste
 	const currentFiles = selectedFilesMap.get(form) || [];
-	selectedFilesMap.set(form, [...currentFiles, ...validFiles]);
+	const newFiles = [...currentFiles, ...validFiles];
+
+	// Limiter au nombre maximum d'images
+	const maxImages = typeof MAX_IMAGES_UPLOAD !== 'undefined' ? MAX_IMAGES_UPLOAD : 10;
+	if (newFiles.length > maxImages) {
+		showAlert(`Vous ne pouvez pas ajouter plus de ${maxImages} images. ${newFiles.length - maxImages} image(s) ignorée(s).`, 'warning', form);
+		selectedFilesMap.set(form, newFiles.slice(0, maxImages));
+	} else {
+		selectedFilesMap.set(form, newFiles);
+	}
 
 	// Afficher l'aperçu
 	displayImagePreviews(form);

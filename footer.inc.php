@@ -95,6 +95,8 @@
 
 	const SMOOBU_ACCOUNT_ID = '<?= SMOOBU_ACCOUNT_ID ?>';
 
+	const MAX_IMAGES_UPLOAD = <?= MAX_IMAGES_UPLOAD ?>;
+
 	// Année dynamique
 	document.getElementById('year').textContent = new Date().getFullYear();
 </script>

@@ -21,6 +21,17 @@ header('Content-Type: application/json; charset=utf-8');
 $bienModel = new Bien();
 $action = $_GET['action'] ?? $_POST['action'] ?? '';
 
+// Détecter si la requête a été tronquée par les limites PHP
+if (empty($action) && $_SERVER['REQUEST_METHOD'] === 'POST' && empty($_POST)) {
+	http_response_code(413);
+	echo json_encode([
+		'success' => false,
+		'message' => 'La requête est trop volumineuse. Réduisez le nombre ou la taille des images.',
+		'hint' => 'Limites PHP: post_max_size=' . ini_get('post_max_size') . ', upload_max_filesize=' . ini_get('upload_max_filesize')
+	]);
+	exit;
+}
+
 $smoobu = new Smoobu(SMOOBU_API_KEY);
 
 switch ($action) {
@@ -88,7 +99,8 @@ switch ($action) {
 				'id' => $bienId,
 				'images_uploaded' => $uploadedCount
 			]);
-		} catch (Exception $e) {
+		}
+		catch (Exception $e) {
 			echo json_encode(['success' => false, 'message' => $e->getMessage()]);
 		}
 		break;
@@ -187,6 +199,12 @@ switch ($action) {
 
 	default:
 		http_response_code(400);
-		echo json_encode(['success' => false, 'message' => 'Action invalide']);
+		echo json_encode([
+			'success' => false,
+			'message' => 'Action invalide',
+			'action_received' => $action,
+			'post_data_exists' => !empty($_POST),
+			'hint' => empty($_POST) && $_SERVER['REQUEST_METHOD'] === 'POST' ? 'La requête POST est vide, vérifiez les limites PHP' : ''
+		]);
 		break;
 }
