@@ -83,7 +83,7 @@
 </div>
 
 <?php if ($mode === 'edit'): ?>
-	<h6 class="mb-3">Images actuelles</h6>
+	<div class="mb-2">Photos actuelles :</div>
 	<div id="edit-images-current" class="mb-3"></div>
 <?php endif; ?>
 

@@ -270,7 +270,7 @@ $locations = array_slice(array_filter($allBiens, fn ($b) => $b['statut'] === 'lo
 											<?php endif; ?>
 											<div class="d-flex gap-2">
 												<button type="button" class="btn btn-outline-sapin btn-sm" onclick="showDetailModal(<?= $bien['id'] ?>)">Détails</button>
-												<button type="button" class="btn btn-sapin btn-sm" onclick="openBookingModal(<?= !empty($bien['id_smoobu']) ? htmlspecialchars($bien['id_smoobu']) : null ?>, '<?= !empty($bien['id_smoobu']) ? htmlspecialchars($bien['titre']) : null ?>')">Réserver</button>
+												<button type="button" class="btn btn-sapin btn-sm" onclick="openBookingModal(<?= !empty($bien['id_smoobu']) ? htmlspecialchars($bien['id_smoobu']) : 0 ?>, '<?= !empty($bien['id_smoobu']) ? htmlspecialchars($bien['titre']) : '' ?>')">Réserver</button>
 											</div>
 										</div>
 									</div>

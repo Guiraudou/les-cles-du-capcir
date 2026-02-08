@@ -674,8 +674,15 @@ function deleteImage(bienId, filename) {
 	.then(response => response.json())
 	.then(data => {
 		if (data.success) {
-			editBien(bienId);
-			showAlert('Image supprimée', 'success');
+			// Recharger juste les images du bien sans rouvrir le modal
+			fetch(`api/biens.php?action=get&id=${bienId}`)
+				.then(response => response.json())
+				.then(data => {
+					if (data.success) {
+						displayCurrentImages(bienId, data.data.images || []);
+						showAlert('Image supprimée', 'success');
+					}
+				});
 		} else {
 			showAlert(data.message || 'Erreur', 'danger');
 		}
@@ -1010,6 +1017,9 @@ function openBookingModal(apartmentId = null, title = null, skipShow = false) {
 	if (!modal || !container) {
 		return;
 	}
+
+	title = title !== '' ? title : null;
+	apartmentId = apartmentId !== 0 ? apartmentId : null;
 
 	// Mise à jour du titre
 	if (title) {

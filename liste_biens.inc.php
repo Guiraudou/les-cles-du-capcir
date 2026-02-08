@@ -93,7 +93,7 @@ $pageDescription = $type === 'vente'
 										<i class="fa-solid fa-eye"></i> Détails
 									</button>
 									<?php if ($bien['statut'] === 'location'): ?>
-										<button type="button" class="btn btn-sapin btn-sm" onclick="openBookingModal(<?= !empty($bien['id_smoobu']) ? htmlspecialchars($bien['id_smoobu']) : null ?>, '<?= !empty($bien['id_smoobu']) ? htmlspecialchars($bien['titre']) : null ?>')">
+										<button type="button" class="btn btn-sapin btn-sm" onclick="openBookingModal(<?= !empty($bien['id_smoobu']) ? htmlspecialchars($bien['id_smoobu']) : 0 ?>, '<?= !empty($bien['id_smoobu']) ? htmlspecialchars($bien['titre']) : '' ?>')">
 											<i class="fa-solid fa-calendar-check"></i> Réserver
 										</button>
 									<?php else: ?>

@@ -39,8 +39,9 @@ $isIndex = ($currentPage === 'index.php');
 				<span class="navbar-text text-white me-3">
 					<i class="fa-solid fa-user"></i> <?= htmlspecialchars($_SESSION['admin_username'] ?? 'Admin') ?>
 				</span>
-				<a href="logout.php" class="btn btn-outline-light btn-sm">
-					<i class="fa-solid fa-right-from-bracket"></i> Déconnexion
+				<a href="logout.php" class="btn btn-outline-light btn-sm d-flex align-items-center gap-2">
+					<i class="fa-solid fa-right-from-bracket"></i>
+					<span>Déconnexion</span>
 				</a>
 			</div>
 		</div>
