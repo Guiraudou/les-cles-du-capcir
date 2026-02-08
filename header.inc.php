@@ -17,7 +17,6 @@
 
 	<!-- Font Awesome 6 -->
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-
 </head>
 
 <body>
@@ -64,6 +63,7 @@ $isIndex = ($currentPage === 'index.php');
 					<li class="nav-item"><a class="nav-link" href="index.php">Accueil</a></li>
 					<li class="nav-item"><a class="nav-link" href="location.php">Location</a></li>
 					<li class="nav-item"><a class="nav-link" href="vente.php">Vente</a></li>
+					<li class="nav-item"><a class="nav-link" href="tarif.php">Tarifs</a></li>
 					<li class="nav-item"><a class="nav-link" href="index.php#contact">Contact</a></li>
 					<li class="nav-item ms-lg-2">
 						<a class="btn btn-sapin" href="#" data-bs-toggle="modal" data-bs-target="#modal_booking">Réserver</a>

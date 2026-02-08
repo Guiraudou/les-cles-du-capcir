@@ -1,6 +1,8 @@
 <?php
 
-require_once __DIR__ . '/../includes/config.php';
+require_once __DIR__ . '/../model/config.php';
+
+use Osimatic\API\Smoobu;
 
 /**
  * API AJAX pour la gestion des biens
@@ -18,6 +20,8 @@ header('Content-Type: application/json; charset=utf-8');
 
 $bienModel = new Bien();
 $action = $_GET['action'] ?? $_POST['action'] ?? '';
+
+$smoobu = new Smoobu(SMOOBU_API_KEY);
 
 switch ($action) {
 	// Récupérer tous les biens
@@ -48,6 +52,15 @@ switch ($action) {
 			break;
 		}
 
+		// Vérifier l'ID Smoobu si fourni
+		$idSmoobu = !empty($_POST['id_smoobu']) ? $_POST['id_smoobu'] : null;
+		if ($idSmoobu && $_POST['statut'] === 'location') {
+			if (null === ($apartment = $smoobu->getApartment((int)$idSmoobu))) {
+				echo json_encode(['success' => false, 'message' => 'ID Smoobu invalide ou appartement non trouvé']);
+				break;
+			}
+		}
+
 		try {
 			$bienId = $bienModel->create([
 				'statut' => $_POST['statut'],
@@ -58,7 +71,8 @@ switch ($action) {
 				'nb_chambres' => !empty($_POST['nb_chambres']) ? intval($_POST['nb_chambres']) : null,
 				'nb_personnes' => !empty($_POST['nb_personnes']) ? intval($_POST['nb_personnes']) : null,
 				'prix' => !empty($_POST['prix']) ? floatval($_POST['prix']) : null,
-				'ordre' => isset($_POST['ordre']) ? intval($_POST['ordre']) : 0
+				'ordre' => isset($_POST['ordre']) ? intval($_POST['ordre']) : 0,
+				'id_smoobu' => $idSmoobu
 			]);
 
 			// Upload des images
@@ -92,6 +106,15 @@ switch ($action) {
 			break;
 		}
 
+		// Vérifier l'ID Smoobu si fourni
+		$idSmoobu = !empty($_POST['id_smoobu']) ? $_POST['id_smoobu'] : null;
+		if ($idSmoobu && $_POST['statut'] === 'location') {
+			if (null === ($apartment = $smoobu->getApartment((int)$idSmoobu))) {
+				echo json_encode(['success' => false, 'message' => 'ID Smoobu invalide ou appartement non trouvé']);
+				break;
+			}
+		}
+
 		try {
 			$updated = $bienModel->update($id, [
 				'statut' => $_POST['statut'],
@@ -103,7 +126,8 @@ switch ($action) {
 				'nb_personnes' => !empty($_POST['nb_personnes']) ? intval($_POST['nb_personnes']) : null,
 				'prix' => !empty($_POST['prix']) ? floatval($_POST['prix']) : null,
 				'actif' => isset($_POST['actif']) ? intval($_POST['actif']) : 1,
-				'ordre' => isset($_POST['ordre']) ? intval($_POST['ordre']) : 0
+				'ordre' => isset($_POST['ordre']) ? intval($_POST['ordre']) : 0,
+				'id_smoobu' => $idSmoobu
 			]);
 
 			// Upload de nouvelles images

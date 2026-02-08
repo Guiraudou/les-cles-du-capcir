@@ -5,7 +5,7 @@
  * Contient toute la logique métier
  */
 
-require_once __DIR__ . '/../JsonDB.php';
+use Osimatic\Data\JsonDB;
 
 class User
 {

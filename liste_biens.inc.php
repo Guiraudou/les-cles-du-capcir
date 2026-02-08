@@ -8,7 +8,7 @@ if (!isset($type) || !in_array($type, ['vente', 'location'])) {
 	die('Type de bien non défini');
 }
 
-require_once 'includes/config.php';
+require_once 'model/config.php';
 
 $bienModel = new Bien();
 $biens = $bienModel->getAll($type, true);
@@ -92,9 +92,15 @@ $pageDescription = $type === 'vente'
 									<button type="button" class="btn btn-outline-sapin btn-sm" onclick="showDetailModal(<?= $bien['id'] ?>)">
 										<i class="fa-solid fa-eye"></i> Détails
 									</button>
-									<a class="btn btn-sapin btn-sm" href="#contact">
-										<i class="fa-solid fa-envelope"></i> Contact
-									</a>
+									<?php if ($bien['statut'] === 'location'): ?>
+										<button type="button" class="btn btn-sapin btn-sm" onclick="openBookingModal(<?= !empty($bien['id_smoobu']) ? htmlspecialchars($bien['id_smoobu']) : null ?>, '<?= !empty($bien['id_smoobu']) ? htmlspecialchars($bien['titre']) : null ?>')">
+											<i class="fa-solid fa-calendar-check"></i> Réserver
+										</button>
+									<?php else: ?>
+										<a class="btn btn-sapin btn-sm" href="#contact">
+											<i class="fa-solid fa-envelope"></i> Contact
+										</a>
+									<?php endif; ?>
 								</div>
 							</div>
 						</div>
@@ -116,6 +122,6 @@ $pageDescription = $type === 'vente'
 
 <?php include 'booking.inc.php'; ?>
 
-<?php include 'modal_detail_bien.inc.php'; ?>
+<?php include 'bien.inc.php'; ?>
 
 <?php require_once 'footer.inc.php'; ?>

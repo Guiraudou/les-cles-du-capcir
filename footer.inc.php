@@ -93,6 +93,8 @@
 	// Chemin des uploads (depuis config.php)
 	const UPLOADS_PATH = "<?= UPLOADS_PATH ?>";
 
+	const SMOOBU_ACCOUNT_ID = '<?= SMOOBU_ACCOUNT_ID ?>';
+
 	// Année dynamique
 	document.getElementById('year').textContent = new Date().getFullYear();
 </script>

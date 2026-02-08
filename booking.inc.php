@@ -7,10 +7,7 @@
 				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
 			</div>
 			<div class="modal-body">
-				<div id="apartmentIframeAll">
-					<script type="text/javascript" src="https://login.smoobu.com/js/Settings/BookingToolIframe.js"></script>
-					<script>BookingToolIframe.initialize({"url": "https://login.smoobu.com/fr/booking-tool/iframe/1436716", "baseUrl": "https://login.smoobu.com", "target": "#apartmentIframeAll"})</script>
-				</div>
+				<div id="booking-iframe-container"></div>
 			</div>
 		</div>
 	</div>
@@ -52,7 +49,7 @@
 	background: #ffffff;
 }
 
-#modal_booking .modal-body #apartmentIframeAll {
+#modal_booking .modal-body #booking-iframe-container {
 	max-width: 1000px;
 	margin: 0 auto;
 }

@@ -237,6 +237,54 @@ function updateStats(biens) {
 }
 
 /**
+ * Charge les données depuis Smoobu et remplit le formulaire
+ */
+function loadSmoobuData(form, mode) {
+	const idSmoobuInput = form.querySelector('[name="id_smoobu"]');
+	const idSmoobu = idSmoobuInput.value.trim();
+
+	if (!idSmoobu) {
+		showAlert('Veuillez entrer un ID Smoobu', 'warning', form);
+		idSmoobuInput.focus();
+		return;
+	}
+
+	const btn = document.getElementById(`btn-load-smoobu-${mode}`);
+	const originalHtml = btn.innerHTML;
+	btn.disabled = true;
+	btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Chargement...';
+
+	fetch(`api/smoobu.php?action=get&id=${idSmoobu}`)
+		.then(response => response.json())
+		.then(data => {
+			if (!data.success) {
+				showAlert(data.error || 'Erreur lors du chargement des données Smoobu', 'danger', form);
+				return;
+			}
+
+			// Remplir les champs du formulaire
+			const bienData = data.data;
+
+			if (bienData.titre) form.querySelector('[name="titre"]').value = bienData.titre;
+			if (bienData.description) form.querySelector('[name="description"]').value = bienData.description;
+			if (bienData.lieu) form.querySelector('[name="lieu"]').value = bienData.lieu;
+			if (bienData.surface) form.querySelector('[name="surface"]').value = bienData.surface;
+			if (bienData.nb_chambres) form.querySelector('[name="nb_chambres"]').value = bienData.nb_chambres;
+			if (bienData.nb_personnes) form.querySelector('[name="nb_personnes"]').value = bienData.nb_personnes;
+			if (bienData.prix) form.querySelector('[name="prix"]').value = bienData.prix;
+
+			showAlert('Données Smoobu chargées avec succès !', 'success', form);
+		})
+		.catch(error => {
+			showAlert('Erreur lors de la communication avec l\'API Smoobu', 'danger', form);
+		})
+		.finally(() => {
+			btn.disabled = false;
+			btn.innerHTML = originalHtml;
+		});
+}
+
+/**
  * Initialise un formulaire de bien (ajout ou édition)
  */
 function initBienForm(form, isAddForm = false) {
@@ -261,6 +309,15 @@ function initBienForm(form, isAddForm = false) {
 
 	// Initialiser l'upload d'images
 	initImageUpload(form);
+
+	// Initialiser le bouton de chargement Smoobu
+	const mode = isAddForm ? 'add' : 'edit';
+	const btnLoadSmoobu = document.getElementById(`btn-load-smoobu-${mode}`);
+	if (btnLoadSmoobu) {
+		btnLoadSmoobu.addEventListener('click', function() {
+			loadSmoobuData(form, mode);
+		});
+	}
 
 	// Gestion de la soumission
 	form.addEventListener('submit', function(e) {
@@ -382,11 +439,7 @@ function handleFiles(files, form) {
 	// Vérifier la taille (max 5MB)
 	const validFiles = imageFiles.filter(file => {
 		if (file.size > 5 * 1024 * 1024) {
-			showModalAlert(
-				form,
-				`L'image ${file.name} dépasse 5MB`,
-				'warning'
-			);
+			showAlert(`L'image ${file.name} dépasse 5MB`, 'warning', form);
 			return false;
 		}
 		return true;
@@ -456,6 +509,16 @@ function toggleFieldsByStatut(form, statut) {
 	venteFields.classList.add('hide');
 	locationFields.classList.add('hide');
 
+	// Gérer l'affichage du champ Smoobu
+	const smoobuContainers = form.querySelectorAll('.smoobu-field-container');
+	smoobuContainers.forEach(container => {
+		if (statut === 'location') {
+			container.classList.remove('hide');
+		} else {
+			container.classList.add('hide');
+		}
+	});
+
 	if (statut === 'vente') {
 		venteFields.classList.remove('hide');
 	} else if (statut === 'location') {
@@ -495,12 +558,12 @@ function submitAddForm() {
 			if (previewContainer) previewContainer.innerHTML = '';
 			loadBiens();
 		} else {
-			showModalAlert(form, data.message || 'Erreur lors de l\'ajout', 'danger');
+			showAlert(data.message || 'Erreur lors de l\'ajout', 'danger', form);
 		}
 	})
 	.catch(error => {
 		console.error('Erreur:', error);
-		showModalAlert(form, 'Erreur de connexion', 'danger');
+		showAlert('Erreur de connexion', 'danger', form);
 	});
 }
 
@@ -551,6 +614,12 @@ function fillEditForm(bien) {
 	form.querySelector('[name="nb_personnes"]').value = bien.nb_personnes || '';
 	form.querySelector('[name="ordre"]').value = bien.ordre || 0;
 	form.querySelector('[name="actif"]').value = bien.actif;
+
+	// ID Smoobu
+	const idSmoobuInput = form.querySelector('[name="id_smoobu"]');
+	if (idSmoobuInput) {
+		idSmoobuInput.value = bien.id_smoobu || '';
+	}
 
 	// Afficher les champs selon le statut
 	toggleFieldsByStatut(form, bien.statut);
@@ -648,12 +717,12 @@ function submitEditForm() {
 			if (previewContainer) previewContainer.innerHTML = '';
 			loadBiens();
 		} else {
-			showModalAlert(form, data.message || 'Erreur lors de la mise à jour', 'danger');
+			showAlert(data.message || 'Erreur lors de la mise à jour', 'danger', form);
 		}
 	})
 	.catch(error => {
 		console.error('Erreur:', error);
-		showModalAlert(form, 'Erreur de connexion', 'danger');
+		showAlert('Erreur de connexion', 'danger', form);
 	});
 }
 
@@ -803,41 +872,16 @@ function deleteBien(id) {
 
 /**
  * Affiche une alerte
+ * @param {string} message - Le message à afficher
+ * @param {string} type - Le type d'alerte ('info', 'success', 'warning', 'danger')
+ * @param {HTMLElement|null} container - Optionnel: l'élément conteneur (form/modal). Si null, affiche dans la page principale
  */
-function showAlert(message, type = 'info') {
-	const alertZone = document.getElementById('alert-zone');
-	if (!alertZone) return;
+function showAlert(message, type = 'info', container = null) {
+	if (!container) {
+		container = document;
+	}
+	const alertZone = container.querySelector('.alert-zone');
 
-	const alertId = 'alert-' + Date.now();
-
-	const alertHTML = `
-		<div id="${alertId}" class="alert alert-${type} alert-dismissible fade show" role="alert">
-			<i class="fa-solid fa-${type === 'success' ? 'check-circle' : type === 'danger' ? 'exclamation-triangle' : 'info-circle'}"></i>
-			${message}
-			<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-		</div>
-	`;
-
-	alertZone.insertAdjacentHTML('beforeend', alertHTML);
-
-	// Auto-dismiss après 5 secondes
-	setTimeout(() => {
-		const alert = document.getElementById(alertId);
-		if (alert) {
-			const bsAlert = new bootstrap.Alert(alert);
-			bsAlert.close();
-		}
-	}, 5000);
-}
-
-/**
- * Affiche une alerte dans un modal
- */
-function showModalAlert(form, message, type = 'info') {
-	const modal = form.closest('.modal');
-	if (!modal) return;
-
-	const alertZone = modal.querySelector('.modal-alert-zone');
 	if (!alertZone) return;
 
 	const alertHTML = `
@@ -926,10 +970,110 @@ function handleLoginForm(e) {
 }
 
 // ============================================================
+// SECTION : RÉSERVATION SMOOBU
+// ============================================================
+
+// Variable pour stocker l'instance du script chargé
+let smoobuScriptLoaded = false;
+
+/**
+ * Charge le script Smoobu une seule fois
+ */
+function loadSmoobuScript() {
+	if (smoobuScriptLoaded) {
+		return Promise.resolve();
+	}
+
+	return new Promise((resolve, reject) => {
+		const script = document.createElement('script');
+		script.src = 'https://login.smoobu.com/js/Settings/BookingToolIframe.js';
+		script.onload = () => {
+			smoobuScriptLoaded = true;
+			resolve();
+		};
+		script.onerror = reject;
+		document.head.appendChild(script);
+	});
+}
+
+/**
+ * Ouvre le modal de réservation avec l'iframe Smoobu
+ * @param {number|null} apartmentId - ID Smoobu de l'appartement (null pour tous les biens)
+ * @param {string|null} title - Titre personnalisé pour le modal
+ * @param {boolean} skipShow - Si true, ne pas ouvrir le modal (déjà ouvert)
+ */
+function openBookingModal(apartmentId = null, title = null, skipShow = false) {
+	const modal = document.getElementById('modal_booking');
+	const modalTitle = document.getElementById('modal_booking_label');
+	const container = document.getElementById('booking-iframe-container');
+
+	if (!modal || !container) {
+		return;
+	}
+
+	// Mise à jour du titre
+	if (title) {
+		modalTitle.textContent = title;
+	} else {
+		modalTitle.textContent = apartmentId ? 'Réserver ce bien' : 'Réserver votre séjour';
+	}
+
+	// Générer un ID unique pour le container iframe
+	const iframeId = apartmentId ? `apartmentIframe${apartmentId}` : 'apartmentIframeAll';
+	const accountId = SMOOBU_ACCOUNT_ID;
+	const iframeUrl = apartmentId
+		? `https://login.smoobu.com/fr/booking-tool/iframe/${accountId}/${apartmentId}`
+		: `https://login.smoobu.com/fr/booking-tool/iframe/${accountId}`;
+
+	// Afficher un loader pendant le chargement
+	container.innerHTML = `
+		<div class="text-center py-5">
+			<div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+				<span class="visually-hidden">Chargement...</span>
+			</div>
+			<p class="mt-3 text-muted">Chargement du système de réservation...</p>
+		</div>
+	`;
+
+	// Charger et initialiser l'iframe Smoobu
+	loadSmoobuScript().then(() => {
+		if (typeof BookingToolIframe !== 'undefined') {
+			// Créer le container de l'iframe
+			container.innerHTML = `<div id="${iframeId}"></div>`;
+
+			BookingToolIframe.initialize({
+				url: iframeUrl,
+				baseUrl: 'https://login.smoobu.com',
+				target: `#${iframeId}`
+			});
+		}
+	}).catch(error => {
+		console.error('Erreur lors du chargement du script Smoobu:', error);
+		container.innerHTML = '<div class="alert alert-danger m-3">Erreur lors du chargement du système de réservation.</div>';
+	});
+
+	// Ouvrir le modal seulement si pas déjà ouvert
+	if (!skipShow) {
+		const bsModal = new bootstrap.Modal(modal);
+		bsModal.show();
+	}
+}
+
+// ============================================================
 // SECTION : INITIALISATION
 // ============================================================
 
 document.addEventListener('DOMContentLoaded', function() {
+	// Gérer l'ouverture du modal de réservation
+	const bookingModal = document.getElementById('modal_booking');
+	if (bookingModal) {
+		bookingModal.addEventListener('show.bs.modal', function(event) {
+			const container = document.getElementById('booking-iframe-container');
+			if (container && !container.hasChildNodes()) {
+				openBookingModal(null, null, true);
+			}
+		});
+	}
 	// Formulaire de contact (page publique)
 	const contactForm = document.getElementById('contactForm');
 	if (contactForm) {

@@ -1,5 +1,5 @@
 <?php
-require_once 'includes/config.php';
+require_once 'model/config.php';
 
 $userModel = new User();
 $userModel->logout();

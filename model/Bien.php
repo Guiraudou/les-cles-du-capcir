@@ -5,7 +5,7 @@
  * Contient toute la logique métier
  */
 
-require_once __DIR__ . '/../JsonDB.php';
+use Osimatic\Data\JsonDB;
 
 class Bien
 {
@@ -206,9 +206,7 @@ class Bien
 				$this->deleteImageFile($filename);
 
 				// Supprimer de la liste des images
-				$bien['images'] = array_filter($bien['images'], function ($img) use ($filename) {
-					return $img['filename'] !== $filename;
-				});
+				$bien['images'] = array_filter($bien['images'], fn ($img) => $img['filename'] !== $filename);
 				$bien['images'] = array_values($bien['images']);
 
 				$this->db->write(self::FILENAME, $biens);
@@ -241,8 +239,9 @@ class Bien
 			$fileSize = $files['size'][$key];
 			$fileError = $files['error'][$key];
 
-			if ($fileError !== UPLOAD_ERR_OK) continue;
-			if ($fileSize > 5 * 1024 * 1024) continue; // Max 5MB
+			if ($fileError !== UPLOAD_ERR_OK || $fileSize > 5 * 1024 * 1024) { // Max 5MB
+				continue;
+			}
 
 			// Vérifier le type MIME
 			$finfo = finfo_open(FILEINFO_MIME_TYPE);
@@ -250,7 +249,9 @@ class Bien
 			finfo_close($finfo);
 
 			$allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
-			if (!in_array($mimeType, $allowedTypes)) continue;
+			if (!in_array($mimeType, $allowedTypes)) {
+				continue;
+			}
 
 			// Générer un nom unique
 			$extension = pathinfo($originalName, PATHINFO_EXTENSION);

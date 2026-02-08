@@ -5,7 +5,7 @@
  * - $mode : 'add' ou 'edit'
  */
 ?>
-<div class="modal-alert-zone"></div>
+<div class="alert-zone"></div>
 
 <div class="mb-3">
 	<div class="d-flex gap-3 justify-content-center">
@@ -16,6 +16,18 @@
 			<label class="form-check-label"><input class="form-check-input" type="radio" name="statut" value="location"> Location</label>
 		</div>
 	</div>
+</div>
+
+<!-- Champ ID Smoobu -->
+<div class="smoobu-field-container mb-3 hide">
+	<label class="form-label fw-bold">ID Smoobu :</label>
+	<div class="input-group">
+		<input type="text" class="form-control" name="id_smoobu" placeholder="Ex: 123456">
+		<button type="button" class="btn btn-primary" id="btn-load-smoobu-<?= $mode ?>">
+			<i class="fa-solid fa-download"></i> Charger
+		</button>
+	</div>
+	<small class="text-muted">Entrez l'ID Smoobu pour charger automatiquement les informations du bien</small>
 </div>
 
 <div class="row g-3 mb-3">

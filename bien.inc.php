@@ -74,3 +74,79 @@
 		</div>
 	</div>
 </div>
+
+<!-- Modal Ajout -->
+<div class="modal fade" id="modalAdd" tabindex="-1">
+	<div class="modal-dialog modal-lg">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title">Ajouter un bien</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+			</div>
+			<form id="formAdd" enctype="multipart/form-data">
+				<div class="modal-body">
+					<?php
+					$mode = 'add';
+					include 'form_bien.inc.php';
+					?>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+					<button type="submit" class="btn btn-success">
+						<i class="fa-solid fa-check"></i> Ajouter
+					</button>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+
+<!-- Modal Édition -->
+<div class="modal fade" id="modalEdit" tabindex="-1">
+	<div class="modal-dialog modal-lg">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title">Modifier un bien</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+			</div>
+			<form id="formEdit" enctype="multipart/form-data">
+				<input type="hidden" name="id" id="edit-id">
+				<div class="modal-body">
+					<?php
+					$mode = 'edit';
+					include 'form_bien.inc.php';
+					?>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+					<button type="submit" class="btn btn-success">
+						<i class="fa-solid fa-check"></i> Enregistrer
+					</button>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+
+<!-- Modal Suppression -->
+<div class="modal fade" id="modalDelete" tabindex="-1">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title">Supprimer un bien</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+			</div>
+			<div class="modal-body text-center">
+				<p>Êtes-vous sûr de vouloir supprimer ce bien ?</p>
+				<p class="fw-bold" id="delete-bien-title"></p>
+				<p class="text-danger"><i class="fa-solid fa-warning"></i> Cette action est irréversible.</p>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+				<button type="button" class="btn btn-danger" id="btnConfirmDelete">
+					<i class="fa-solid fa-trash"></i> Supprimer
+				</button>
+			</div>
+		</div>
+	</div>
+</div>

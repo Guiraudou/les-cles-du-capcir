@@ -1,6 +1,6 @@
 <?php
 // Traitement du formulaire de contact
-require_once __DIR__ . '/../includes/config.php';
+require_once __DIR__ . '/../model/config.php';
 
 header('Content-Type: application/json; charset=utf-8');
 

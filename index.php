@@ -1,5 +1,5 @@
 <?php
-require_once 'includes/config.php';
+require_once 'model/config.php';
 
 // Charger les biens depuis la base de données
 $bienModel = new Bien();
@@ -29,6 +29,7 @@ $locations = array_slice(array_filter($allBiens, fn ($b) => $b['statut'] === 'lo
 				<a class="nav-link" href="#top">Accueil</a>
 				<a class="nav-link" href="location.php">Location</a>
 				<a class="nav-link" href="vente.php">Vente</a>
+				<a class="nav-link" href="tarif.php">Tarifs</a>
 				<a class="nav-link" href="#contact">Contact</a>
 				<a class="btn-ghost" href="#" data-bs-toggle="modal" data-bs-target="#modal_booking">Réserver</a>
 			</div>
@@ -269,7 +270,7 @@ $locations = array_slice(array_filter($allBiens, fn ($b) => $b['statut'] === 'lo
 											<?php endif; ?>
 											<div class="d-flex gap-2">
 												<button type="button" class="btn btn-outline-sapin btn-sm" onclick="showDetailModal(<?= $bien['id'] ?>)">Détails</button>
-												<a class="btn btn-sapin btn-sm" href="#" data-bs-toggle="modal" data-bs-target="#modal_booking">Réserver</a>
+												<button type="button" class="btn btn-sapin btn-sm" onclick="openBookingModal(<?= !empty($bien['id_smoobu']) ? htmlspecialchars($bien['id_smoobu']) : null ?>, '<?= !empty($bien['id_smoobu']) ? htmlspecialchars($bien['titre']) : null ?>')">Réserver</button>
 											</div>
 										</div>
 									</div>
@@ -295,6 +296,6 @@ $locations = array_slice(array_filter($allBiens, fn ($b) => $b['statut'] === 'lo
 <!-- FOOTER -->
 
 <?php include 'booking.inc.php'; ?>
-<?php include 'modal_detail_bien.inc.php'; ?>
+<?php include 'bien.inc.php'; ?>
 
 <?php require_once 'footer.inc.php'; ?>
