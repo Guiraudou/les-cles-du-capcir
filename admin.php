@@ -7,23 +7,6 @@ $userModel->requireAuth();
 ?>
 <?php require_once 'header.inc.php'; ?>
 
-<!-- Navbar -->
-<nav class="navbar navbar-dark mb-4">
-	<div class="container-fluid">
-		<span class="navbar-brand">
-			<i class="fa-solid fa-key"></i> Administration - Les clés du Capcir
-		</span>
-		<div class="d-flex gap-2">
-			<span class="navbar-text text-white me-3">
-				<i class="fa-solid fa-user"></i> <?= htmlspecialchars($_SESSION['admin_username']) ?>
-			</span>
-			<a href="logout.php" class="btn btn-outline-light btn-sm">
-				<i class="fa-solid fa-right-from-bracket"></i> Déconnexion
-			</a>
-		</div>
-	</div>
-</nav>
-
 <div class="container">
 	<!-- Stats -->
 	<div class="row mb-4">

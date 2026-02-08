@@ -21,10 +21,16 @@ $pageDescription = $type === 'vente'
 <?php require_once 'header.inc.php'; ?>
 
 <!-- Hero Section -->
-<section class="hero-section" style="background: linear-gradient(135deg, <?= $type === 'vente' ? '#1e40af' : '#059669' ?> 0%, <?= $type === 'vente' ? '#3b82f6' : '#10b981' ?> 100%); padding: 80px 0;">
-	<div class="container text-center text-white">
-		<h1 class="display-4 fw-bold mb-3"><?= $pageTitle ?></h1>
-		<p class="lead"><?= $pageDescription ?></p>
+<section class="page-hero <?= $type === 'vente' ? 'page-hero-vente' : 'page-hero-location' ?>">
+	<div class="container">
+		<div class="row align-items-center">
+			<div class="col-lg-8 mx-auto text-center">
+				<div class="page-hero-icon mb-3">
+					<i class="fa-solid <?= $type === 'vente' ? 'fa-house-circle-check' : 'fa-key' ?>"></i>
+				</div>
+				<h1 class="page-hero-title"><?= $pageTitle ?></h1>
+			</div>
+		</div>
 	</div>
 </section>
 
@@ -41,41 +47,45 @@ $pageDescription = $type === 'vente'
 				<?php foreach ($biens as $bien): ?>
 					<div class="col-md-6 col-lg-4">
 						<div class="listing h-100">
-							<?php if (!empty($bien['images'])): ?>
-								<img src="<?= htmlspecialchars($bien['images'][0]['url']) ?>" alt="<?= htmlspecialchars($bien['titre']) ?>">
-							<?php else: ?>
-								<div class="listing-image-placeholder bg-secondary d-flex align-items-center justify-content-center text-white">
-									<i class="fa-solid fa-image fa-3x opacity-50"></i>
+							<div class="listing-image-container">
+								<?php if (!empty($bien['images'])): ?>
+									<img src="<?= htmlspecialchars($bien['images'][0]['url']) ?>" alt="<?= htmlspecialchars($bien['titre']) ?>">
+								<?php else: ?>
+									<div class="listing-image-placeholder bg-secondary d-flex align-items-center justify-content-center text-white">
+										<i class="fa-solid fa-image fa-3x opacity-50"></i>
+									</div>
+								<?php endif; ?>
+								<div class="listing-image-overlay">
+									<h5 class="listing-image-title"><?= htmlspecialchars($bien['titre']) ?></h5>
 								</div>
-							<?php endif; ?>
+							</div>
 							<div class="body">
-								<h5 class="fw-bold mb-2"><?= htmlspecialchars($bien['titre']) ?></h5>
-
+								<div class="mb-2 fw-bold small">
+									<?php if (!empty($bien['surface'])): ?>
+										<?= htmlspecialchars($bien['surface']) ?> m²
+									<?php endif; ?>
+									<?php if (!empty($bien['nb_chambres'])): ?>
+										<?= !empty($bien['surface']) ? ' • ' : '' ?><?= htmlspecialchars($bien['nb_chambres']) ?> ch.
+									<?php endif; ?>
+									<?php if (!empty($bien['nb_personnes'])): ?>
+										<?= (!empty($bien['surface']) || !empty($bien['nb_chambres'])) ? ' • ' : '' ?><?= htmlspecialchars($bien['nb_personnes']) ?> pers.
+									<?php endif; ?>
+								</div>
 								<div class="text-muted small mb-3">
 									<?php if (!empty($bien['lieu'])): ?>
 										<i class="fa-solid fa-location-dot"></i> <?= htmlspecialchars($bien['lieu']) ?>
 									<?php endif; ?>
-									<?php if (!empty($bien['surface'])): ?>
-										<?= !empty($bien['lieu']) ? ' • ' : '' ?><?= htmlspecialchars($bien['surface']) ?> m²
-									<?php endif; ?>
-									<?php if (!empty($bien['nb_chambres'])): ?>
-										• <?= htmlspecialchars($bien['nb_chambres']) ?> ch.
-									<?php endif; ?>
-									<?php if ($type === 'location' && !empty($bien['nb_personnes'])): ?>
-										• <?= htmlspecialchars($bien['nb_personnes']) ?> pers.
-									<?php endif; ?>
 								</div>
+								<?php if (!empty($bien['prix'])): ?>
+									<div class="prix prix-right text-nowrap">
+										<?= number_format($bien['prix'], 0, ',', ' ') ?> €
+									</div>
+								<?php endif; ?>
 
 								<?php if (!empty($bien['description'])): ?>
 									<p class="small text-muted mb-3">
 										<?= htmlspecialchars(mb_substr($bien['description'], 0, 100)) ?><?= mb_strlen($bien['description']) > 100 ? '...' : '' ?>
 									</p>
-								<?php endif; ?>
-
-								<?php if (!empty($bien['prix'])): ?>
-									<div class="fw-bold fs-5 mb-3" style="color: <?= $type === 'vente' ? '#1e40af' : '#059669' ?>;">
-										<?= number_format($bien['prix'], 0, ',', ' ') ?> €<?= $type === 'location' ? '/semaine' : '' ?>
-									</div>
 								<?php endif; ?>
 
 								<div class="d-flex gap-2">
@@ -96,13 +106,15 @@ $pageDescription = $type === 'vente'
 </section>
 
 <!-- Section Contact -->
-<section id="contact" class="py-5" style="background: var(--bg);">
+<section id="contact" style="background: var(--bg);">
 	<div class="container">
 		<h2 class="text-center mb-4">Vous êtes intéressé ?</h2>
 		<p class="text-center text-muted mb-4">Contactez-nous pour plus d'informations ou pour organiser une visite.</p>
 		<?php include 'contact.inc.php'; ?>
 	</div>
 </section>
+
+<?php include 'booking.inc.php'; ?>
 
 <?php include 'modal_detail_bien.inc.php'; ?>
 

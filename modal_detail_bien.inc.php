@@ -25,35 +25,47 @@
 					<!-- Vignettes seront insérées ici -->
 				</div>
 
+				<!-- Prix -->
+				<div id="modalDetailPrixContainer" class="prix prix-right text-nowrap mb-3">
+					<span id="modalDetailPrix"></span>
+				</div>
 
 				<!-- Informations principales -->
-				<div class="row g-3 mb-3">
-					<div class="col-md-6">
-						<strong><i class="fa-solid fa-location-dot"></i> Lieu :</strong>
-						<span id="modalDetailLieu"></span>
+				<div class="detail-info-grid mb-4">
+					<div class="detail-info-item">
+						<i class="fa-solid fa-location-dot text-muted"></i>
+						<div>
+							<div class="detail-info-label">Lieu</div>
+							<div class="detail-info-value" id="modalDetailLieu"></div>
+						</div>
 					</div>
-					<div class="col-md-6">
-						<strong><i class="fa-solid fa-ruler-combined"></i> Surface :</strong>
-						<span id="modalDetailSurface"></span>
+					<div class="detail-info-item">
+						<i class="fa-solid fa-ruler-combined text-muted"></i>
+						<div>
+							<div class="detail-info-label">Surface</div>
+							<div class="detail-info-value" id="modalDetailSurface"></div>
+						</div>
 					</div>
-					<div class="col-md-6">
-						<strong><i class="fa-solid fa-bed"></i> Chambres :</strong>
-						<span id="modalDetailChambres"></span>
+					<div class="detail-info-item">
+						<i class="fa-solid fa-bed text-muted"></i>
+						<div>
+							<div class="detail-info-label">Chambres</div>
+							<div class="detail-info-value" id="modalDetailChambres"></div>
+						</div>
 					</div>
-					<div class="col-md-6" id="modalDetailPersonnesContainer">
-						<strong><i class="fa-solid fa-users"></i> Personnes :</strong>
-						<span id="modalDetailPersonnes"></span>
-					</div>
-					<div class="col-md-6" id="modalDetailPrixContainer">
-						<strong><i class="fa-solid fa-euro-sign"></i> Prix :</strong>
-						<span id="modalDetailPrix" class="fs-5 fw-bold"></span>
+					<div class="detail-info-item" id="modalDetailPersonnesContainer">
+						<i class="fa-solid fa-users text-muted"></i>
+						<div>
+							<div class="detail-info-label">Personnes</div>
+							<div class="detail-info-value" id="modalDetailPersonnes"></div>
+						</div>
 					</div>
 				</div>
 
 				<!-- Description -->
-				<div class="mb-3">
-					<strong>Description :</strong>
-					<p id="modalDetailDescription" class="mt-2"></p>
+				<div class="detail-description">
+					<h6 class="text-muted mb-2">Description</h6>
+					<p id="modalDetailDescription"></p>
 				</div>
 			</div>
 			<div class="modal-footer">

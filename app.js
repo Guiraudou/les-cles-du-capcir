@@ -735,7 +735,15 @@ function displayBienDetail(bien) {
 	document.getElementById('modalDetailLieu').textContent = bien.lieu || 'Non renseigné';
 	document.getElementById('modalDetailSurface').textContent = bien.surface ? `${bien.surface} m²` : 'Non renseigné';
 	document.getElementById('modalDetailChambres').textContent = bien.nb_chambres || 'Non renseigné';
-	document.getElementById('modalDetailPersonnes').textContent = bien.nb_personnes || 'Non renseigné';
+
+	// Personnes (seulement pour les locations)
+	const personnesContainer = document.getElementById('modalDetailPersonnesContainer');
+	if (bien.statut === 'location' && bien.nb_personnes) {
+		personnesContainer.style.display = 'flex';
+		document.getElementById('modalDetailPersonnes').textContent = bien.nb_personnes;
+	} else {
+		personnesContainer.style.display = 'none';
+	}
 
 	// Prix
 	const prixContainer = document.getElementById('modalDetailPrixContainer');
