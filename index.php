@@ -1,5 +1,14 @@
 <?php
 require_once 'includes/config.php';
+
+// Charger les biens depuis la base de données
+$bienModel = new Bien();
+$allBiens = $bienModel->getAll();
+
+// Filtrer et limiter les biens actifs
+$ventes = array_slice(array_filter($allBiens, fn ($b) => $b['statut'] === 'vente' && $b['actif']), 0, 3);
+$locations = array_slice(array_filter($allBiens, fn ($b) => $b['statut'] === 'location' && $b['actif']), 0, 3);
+
 ?>
 <?php require_once 'header.inc.php'; ?>
 
@@ -30,7 +39,7 @@ require_once 'includes/config.php';
 </nav>
 
 <!-- HERO (with integrated menu) -->
-<header id="top" class="hero" style="--hero-image: url('');">
+<header id="top" class="hero">
 
 	<!-- Logo en haut à gauche -->
 	<div class="hero-logo-corner">
@@ -171,48 +180,50 @@ require_once 'includes/config.php';
 					</div>
 
 					<div class="row g-3">
-						<div class="col-12">
-							<div class="listing">
-								<img src="https://images.unsplash.com/photo-1449844908441-8829872d2607?auto=format&fit=crop&w=1600&q=80" alt="Vente 1">
-								<div class="body">
-									<div class="fw-bold">Chalet • 120 m² • 4 ch</div>
-									<div class="text-muted small mb-3">Les Angles • Terrasse • Vue montagne</div>
-									<div class="d-flex gap-2">
-										<a class="btn btn-outline-sapin btn-sm btn-details" href="vente.html">Détails</a>
-										<a class="btn btn-sapin btn-sm" href="#contact">Infos / visite</a>
-									</div>
+						<?php if (empty($ventes)): ?>
+							<div class="col-12">
+								<div class="alert alert-info mb-0">
+									Aucun bien en vente pour le moment.
 								</div>
 							</div>
-						</div>
-
-						<div class="col-12">
-							<div class="listing">
-								<img src="https://images.unsplash.com/photo-1501183638710-841dd1904471?auto=format&fit=crop&w=1600&q=80" alt="Vente 2">
-								<div class="body">
-									<div class="fw-bold">Appartement • 65 m² • 2 ch</div>
-									<div class="text-muted small mb-3">Font-Romeu • Balcon • Proche centre</div>
-									<div class="d-flex gap-2">
-										<a class="btn btn-outline-sapin btn-sm btn-details" href="vente.html">Détails</a>
-										<a class="btn btn-sapin btn-sm" href="#contact">Infos / visite</a>
+						<?php else: ?>
+							<?php foreach ($ventes as $bien): ?>
+								<div class="col-12">
+									<div class="listing">
+										<?php
+										$firstImage = !empty($bien['images']) ? $bien['images'][0] : 'https://images.unsplash.com/photo-1449844908441-8829872d2607?auto=format&fit=crop&w=1600&q=80';
+										?>
+										<img src="<?= htmlspecialchars($firstImage) ?>" alt="<?= htmlspecialchars($bien['titre']) ?>">
+										<div class="body">
+											<div class="fw-bold">
+												<?= htmlspecialchars($bien['titre']) ?>
+												<?php if (!empty($bien['surface'])): ?>
+													• <?= htmlspecialchars($bien['surface']) ?> m²
+												<?php endif; ?>
+												<?php if (!empty($bien['nb_chambres'])): ?>
+													• <?= htmlspecialchars($bien['nb_chambres']) ?> ch
+												<?php endif; ?>
+											</div>
+											<div class="text-muted small mb-3">
+												<?php if (!empty($bien['lieu'])): ?>
+													<?= htmlspecialchars($bien['lieu']) ?>
+												<?php endif; ?>
+												<?php if (!empty($bien['description'])): ?>
+													• <?= htmlspecialchars(mb_substr($bien['description'], 0, 50)) ?><?= mb_strlen($bien['description']) > 50 ? '...' : '' ?>
+												<?php endif; ?>
+											</div>
+											<?php if (!empty($bien['prix'])): ?>
+												<div class="fw-bold text-success mb-2"><?= number_format($bien['prix'], 0, ',', ' ') ?> €</div>
+											<?php endif; ?>
+											<div class="d-flex gap-2">
+												<a class="btn btn-outline-sapin btn-sm btn-details" href="vente.html">Détails</a>
+												<a class="btn btn-sapin btn-sm" href="#contact">Infos / visite</a>
+											</div>
+										</div>
 									</div>
 								</div>
-							</div>
-						</div>
-
-						<div class="col-12">
-							<div class="listing">
-								<img src="https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=1600&q=80" alt="Vente 3">
-								<div class="body">
-									<div class="fw-bold">Studio • 28 m²</div>
-									<div class="text-muted small mb-3">Matemale • Investissement • Rendement locatif</div>
-									<div class="d-flex gap-2">
-										<a class="btn btn-outline-sapin btn-sm btn-details" href="vente.html">Détails</a>
-										<a class="btn btn-sapin btn-sm" href="#contact">Infos / visite</a>
-									</div>
-								</div>
-							</div>
-						</div>
-
+							<?php endforeach; ?>
+						<?php endif; ?>
 					</div>
 				</div>
 			</div>
@@ -226,48 +237,47 @@ require_once 'includes/config.php';
 					</div>
 
 					<div class="row g-3">
-						<div class="col-12">
-							<div class="listing">
-								<img src="https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=1600&q=80" alt="Location 1">
-								<div class="body">
-									<div class="fw-bold">Chalet cosy • 6 pers</div>
-									<div class="text-muted small mb-3">Les Angles • 3 chambres • Parking</div>
-									<div class="d-flex gap-2">
-										<a class="btn btn-outline-sapin btn-sm" href="locations.html">Détails</a>
-										<a class="btn btn-sapin btn-sm" href="#" data-bs-toggle="modal" data-bs-target="#modal_booking">Réserver</a>
-									</div>
+						<?php if (empty($locations)): ?>
+							<div class="col-12">
+								<div class="alert alert-info mb-0">
+									Aucun bien en location pour le moment.
 								</div>
 							</div>
-						</div>
-
-						<div class="col-12">
-							<div class="listing">
-								<img src="https://images.unsplash.com/photo-1482192505345-5655af888cc4?auto=format&fit=crop&w=1600&q=80" alt="Location 2">
-								<div class="body">
-									<div class="fw-bold">Appartement • 4 pers</div>
-									<div class="text-muted small mb-3">Font-Romeu • 2 chambres • Balcon</div>
-									<div class="d-flex gap-2">
-										<a class="btn btn-outline-sapin btn-sm" href="locations.html">Détails</a>
-										<a class="btn btn-sapin btn-sm" href="#" data-bs-toggle="modal" data-bs-target="#modal_booking">Réserver</a>
+						<?php else: ?>
+							<?php foreach ($locations as $bien): ?>
+								<div class="col-12">
+									<div class="listing">
+										<?php
+										$firstImage = !empty($bien['images']) ? $bien['images'][0] : 'https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=1600&q=80';
+										?>
+										<img src="<?= htmlspecialchars($firstImage) ?>" alt="<?= htmlspecialchars($bien['titre']) ?>">
+										<div class="body">
+											<div class="fw-bold">
+												<?= htmlspecialchars($bien['titre']) ?>
+												<?php if (!empty($bien['nb_personnes'])): ?>
+													• <?= htmlspecialchars($bien['nb_personnes']) ?> pers
+												<?php endif; ?>
+											</div>
+											<div class="text-muted small mb-3">
+												<?php if (!empty($bien['lieu'])): ?>
+													<?= htmlspecialchars($bien['lieu']) ?>
+												<?php endif; ?>
+												<?php if (!empty($bien['nb_chambres'])): ?>
+													• <?= htmlspecialchars($bien['nb_chambres']) ?> chambres
+												<?php endif; ?>
+												<?php if (!empty($bien['description'])): ?>
+													• <?= htmlspecialchars(mb_substr($bien['description'], 0, 40)) ?><?= mb_strlen($bien['description']) > 40 ? '...' : '' ?>
+												<?php endif; ?>
+											</div>
+											<div class="d-flex gap-2">
+												<a class="btn btn-outline-sapin btn-sm" href="locations.html">Détails</a>
+												<a class="btn btn-sapin btn-sm" href="#" data-bs-toggle="modal" data-bs-target="#modal_booking">Réserver</a>
+											</div>
+										</div>
 									</div>
 								</div>
-							</div>
-						</div>
-
-						<div class="col-12">
-							<div class="listing">
-								<img src="https://images.unsplash.com/photo-1516455207990-7a41ce80f7ee?auto=format&fit=crop&w=1600&q=80" alt="Location 3">
-								<div class="body">
-									<div class="fw-bold">Studio • 2 pers</div>
-									<div class="text-muted small mb-3">Matemale • Wifi • Proche nature</div>
-									<div class="d-flex gap-2">
-										<a class="btn btn-outline-sapin btn-sm" href="locations.html">Détails</a>
-										<a class="btn btn-sapin btn-sm" href="#" data-bs-toggle="modal" data-bs-target="#modal_booking">Réserver</a>
-									</div>
-								</div>
-							</div>
-						</div>
-
+							<?php endforeach; ?>
+						<?php endif; ?>
 					</div>
 				</div>
 			</div>

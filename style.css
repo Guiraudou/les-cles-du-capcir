@@ -22,6 +22,10 @@ html, body{
 	color: var(--muted) !important;
 }
 
+.hide {
+	display: none;
+}
+
 [id]{
 	scroll-margin-top: 90px;
 }
@@ -715,14 +719,6 @@ footer .border-top{
 
 .badge-location {
 	background: #198754;
-}
-
-.form-section {
-	display: none;
-}
-
-.form-section.active {
-	display: block;
 }
 
 .image-preview {

@@ -215,23 +215,35 @@ function updateStats(biens) {
  */
 function initForms() {
 	// Gestion du statut dans le formulaire d'ajout
-	const addStatut = document.getElementById('add-statut');
-	if (addStatut) {
-		addStatut.addEventListener('change', function() {
-			toggleFieldsByStatut('add', this.value);
+	const formAdd = document.getElementById('formAdd');
+	if (formAdd) {
+		const addStatuts = formAdd.querySelectorAll('[name="statut"]');
+		addStatuts.forEach(radio => {
+			radio.addEventListener('change', function() {
+				toggleFieldsByStatut(formAdd, this.value);
+			});
 		});
+
+		// Sélectionner "vente" par défaut
+		const venteRadio = formAdd.querySelector('[name="statut"][value="vente"]');
+		if (venteRadio) {
+			venteRadio.checked = true;
+			toggleFieldsByStatut(formAdd, 'vente');
+		}
 	}
 
 	// Gestion du statut dans le formulaire d'édition
-	const editStatut = document.getElementById('edit-statut');
-	if (editStatut) {
-		editStatut.addEventListener('change', function() {
-			toggleFieldsByStatut('edit', this.value);
+	const formEdit = document.getElementById('formEdit');
+	if (formEdit) {
+		const editStatuts = formEdit.querySelectorAll('[name="statut"]');
+		editStatuts.forEach(radio => {
+			radio.addEventListener('change', function() {
+				toggleFieldsByStatut(formEdit, this.value);
+			});
 		});
 	}
 
 	// Soumission du formulaire d'ajout
-	const formAdd = document.getElementById('formAdd');
 	if (formAdd) {
 		formAdd.addEventListener('submit', function(e) {
 			e.preventDefault();
@@ -240,7 +252,6 @@ function initForms() {
 	}
 
 	// Soumission du formulaire d'édition
-	const formEdit = document.getElementById('formEdit');
 	if (formEdit) {
 		formEdit.addEventListener('submit', function(e) {
 			e.preventDefault();
@@ -260,19 +271,19 @@ function initForms() {
 /**
  * Affiche/masque les champs selon le statut
  */
-function toggleFieldsByStatut(prefix, statut) {
-	const venteFields = document.getElementById(`${prefix}-vente-fields`);
-	const locationFields = document.getElementById(`${prefix}-location-fields`);
+function toggleFieldsByStatut(form, statut) {
+	const venteFields = form.querySelector('.vente-fields');
+	const locationFields = form.querySelector('.location-fields');
 
 	if (!venteFields || !locationFields) return;
 
-	venteFields.classList.remove('active');
-	locationFields.classList.remove('active');
+	venteFields.classList.add('hide');
+	locationFields.classList.add('hide');
 
 	if (statut === 'vente') {
-		venteFields.classList.add('active');
+		venteFields.classList.remove('hide');
 	} else if (statut === 'location') {
-		locationFields.classList.add('active');
+		locationFields.classList.remove('hide');
 	}
 }
 
@@ -296,12 +307,12 @@ function submitAddForm() {
 			form.reset();
 			loadBiens();
 		} else {
-			showAlert(data.message || 'Erreur lors de l\'ajout', 'danger');
+			showModalAlert(form, data.message || 'Erreur lors de l\'ajout', 'danger');
 		}
 	})
 	.catch(error => {
 		console.error('Erreur:', error);
-		showAlert('Erreur de connexion', 'danger');
+		showModalAlert(form, 'Erreur de connexion', 'danger');
 	});
 }
 
@@ -329,21 +340,32 @@ function editBien(id) {
  * Remplit le formulaire d'édition
  */
 function fillEditForm(bien) {
-	document.getElementById('edit-id').value = bien.id;
-	document.getElementById('edit-statut').value = bien.statut;
-	document.getElementById('edit-titre').value = bien.titre;
-	document.getElementById('edit-lieu').value = bien.lieu || '';
-	document.getElementById('edit-surface').value = bien.surface || '';
-	document.getElementById('edit-description').value = bien.description || '';
-	document.getElementById('edit-prix').value = bien.prix || '';
-	document.getElementById('edit-nb-chambres').value = bien.nb_chambres || '';
-	document.getElementById('edit-nb-chambres-loc').value = bien.nb_chambres || '';
-	document.getElementById('edit-nb-personnes').value = bien.nb_personnes || '';
-	document.getElementById('edit-ordre').value = bien.ordre || 0;
-	document.getElementById('edit-actif').value = bien.actif;
+	const form = document.getElementById('formEdit');
+
+	form.querySelector('[name="id"]').value = bien.id;
+
+	// Cocher le bon radio button pour le statut
+	const statutRadios = form.querySelectorAll('[name="statut"]');
+	statutRadios.forEach(radio => {
+		radio.checked = (radio.value === bien.statut);
+	});
+
+	form.querySelector('[name="titre"]').value = bien.titre;
+	form.querySelector('[name="lieu"]').value = bien.lieu || '';
+	form.querySelector('[name="surface"]').value = bien.surface || '';
+	form.querySelector('[name="description"]').value = bien.description || '';
+	form.querySelector('[name="prix"]').value = bien.prix || '';
+
+	// Nombre de chambres (peut être dans vente ou location)
+	const nbChambresInputs = form.querySelectorAll('[name="nb_chambres"]');
+	nbChambresInputs.forEach(input => input.value = bien.nb_chambres || '');
+
+	form.querySelector('[name="nb_personnes"]').value = bien.nb_personnes || '';
+	form.querySelector('[name="ordre"]').value = bien.ordre || 0;
+	form.querySelector('[name="actif"]').value = bien.actif;
 
 	// Afficher les champs selon le statut
-	toggleFieldsByStatut('edit', bien.statut);
+	toggleFieldsByStatut(form, bien.statut);
 
 	// Afficher les images actuelles
 	displayCurrentImages(bien.id, bien.images || []);
@@ -421,12 +443,12 @@ function submitEditForm() {
 			bootstrap.Modal.getInstance(document.getElementById('modalEdit')).hide();
 			loadBiens();
 		} else {
-			showAlert(data.message || 'Erreur lors de la mise à jour', 'danger');
+			showModalAlert(form, data.message || 'Erreur lors de la mise à jour', 'danger');
 		}
 	})
 	.catch(error => {
 		console.error('Erreur:', error);
-		showAlert('Erreur de connexion', 'danger');
+		showModalAlert(form, 'Erreur de connexion', 'danger');
 	});
 }
 
@@ -496,6 +518,32 @@ function showAlert(message, type = 'info') {
 			const bsAlert = new bootstrap.Alert(alert);
 			bsAlert.close();
 		}
+	}, 5000);
+}
+
+/**
+ * Affiche une alerte dans un modal
+ */
+function showModalAlert(form, message, type = 'info') {
+	const modal = form.closest('.modal');
+	if (!modal) return;
+
+	const alertZone = modal.querySelector('.modal-alert-zone');
+	if (!alertZone) return;
+
+	const alertHTML = `
+		<div class="alert alert-${type} alert-dismissible fade show" role="alert">
+			<i class="fa-solid fa-${type === 'success' ? 'check-circle' : type === 'danger' ? 'exclamation-triangle' : 'info-circle'}"></i>
+			${message}
+			<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+		</div>
+	`;
+
+	alertZone.innerHTML = alertHTML;
+
+	// Auto-dismiss après 5 secondes
+	setTimeout(() => {
+		alertZone.innerHTML = '';
 	}, 5000);
 }
 
