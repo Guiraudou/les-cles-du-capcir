@@ -680,26 +680,46 @@ function showDetailModal(id) {
  * Affiche les détails d'un bien dans la modal
  */
 function displayBienDetail(bien) {
-	// Titre
-	document.getElementById('modalDetailBienTitle').textContent = bien.titre;
+	const modalContent = document.querySelector('#modalDetailBien .modal-content');
 
-	// Badge statut
-	const statutBadge = document.getElementById('modalDetailStatut');
-	statutBadge.textContent = bien.statut.charAt(0).toUpperCase() + bien.statut.slice(1);
-	statutBadge.className = `badge me-2 ${bien.statut === 'vente' ? 'badge-vente' : 'badge-location'}`;
+	// Appliquer le style inactif si nécessaire
+	if (bien.actif == 0) {
+		modalContent.classList.add('bien-inactif');
+	} else {
+		modalContent.classList.remove('bien-inactif');
+	}
 
-	// Badge inactif
-	const inactifBadge = document.getElementById('modalDetailActif');
-	inactifBadge.style.display = bien.actif == 0 ? 'inline-block' : 'none';
+	// Titre avec badge
+	const statutLabel = `<span class="badge ${bien.statut === 'vente' ? 'badge-vente' : 'badge-location'} me-2">${bien.statut.charAt(0).toUpperCase() + bien.statut.slice(1)}</span>`;
+	const inactifLabel = bien.actif == 0 ? ' <span class="text-muted">(Inactif)</span>' : '';
+	document.getElementById('modalDetailBienTitle').innerHTML = statutLabel + escapeHtml(bien.titre) + inactifLabel;
 
 	// Images - Carrousel
 	const imagesContainer = document.getElementById('modalDetailImages');
+	const thumbnailsContainer = document.getElementById('modalDetailThumbnails');
+	const carousel = document.getElementById('carouselDetailBien');
+
 	if (bien.images && bien.images.length > 0) {
+		// Générer les slides du carrousel
 		imagesContainer.innerHTML = bien.images.map((img, index) => `
 			<div class="carousel-item ${index === 0 ? 'active' : ''}">
 				<img src="${img.url}" class="d-block w-100" alt="${escapeHtml(bien.titre)}" style="max-height: 500px; object-fit: contain;">
 			</div>
 		`).join('');
+
+		// Générer les vignettes
+		thumbnailsContainer.innerHTML = bien.images.map((img, index) => `
+			<div class="thumbnail ${index === 0 ? 'active' : ''}" data-bs-target="#carouselDetailBien" data-bs-slide-to="${index}">
+				<img src="${img.url}" alt="${escapeHtml(bien.titre)}">
+			</div>
+		`).join('');
+
+		// Ajouter l'événement pour mettre à jour la vignette active
+		const bsCarousel = new bootstrap.Carousel(carousel);
+		carousel.addEventListener('slid.bs.carousel', function(e) {
+			document.querySelectorAll('.thumbnail').forEach(thumb => thumb.classList.remove('active'));
+			document.querySelectorAll('.thumbnail')[e.to].classList.add('active');
+		});
 	} else {
 		imagesContainer.innerHTML = `
 			<div class="carousel-item active">
@@ -708,6 +728,7 @@ function displayBienDetail(bien) {
 				</div>
 			</div>
 		`;
+		thumbnailsContainer.innerHTML = '';
 	}
 
 	// Informations

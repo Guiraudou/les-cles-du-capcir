@@ -27,8 +27,8 @@ $locations = array_slice(array_filter($allBiens, fn ($b) => $b['statut'] === 'lo
 		<div class="collapse navbar-collapse" id="stickyMenu">
 			<ul class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
 				<li class="nav-item"><a class="nav-link" href="#top">Accueil</a></li>
-				<li class="nav-item"><a class="nav-link" href="#services">Services</a></li>
-				<li class="nav-item"><a class="nav-link" href="#biens">Biens</a></li>
+				<li class="nav-item"><a class="nav-link" href="location.php">Location</a></li>
+				<li class="nav-item"><a class="nav-link" href="vente.php">Vente</a></li>
 				<li class="nav-item"><a class="nav-link" href="#contact">Contact</a></li>
 				<li class="nav-item ms-lg-2">
 					<a class="btn btn-sapin" href="#" data-bs-toggle="modal" data-bs-target="#modal_booking">Réserver</a>
@@ -53,8 +53,8 @@ $locations = array_slice(array_filter($allBiens, fn ($b) => $b['statut'] === 'lo
 
 			<div class="d-none d-lg-flex align-items-center gap-4">
 				<a class="nav-link" href="#top">Accueil</a>
-				<a class="nav-link" href="#services">Services</a>
-				<a class="nav-link" href="#biens">Biens</a>
+				<a class="nav-link" href="location.php">Location</a>
+				<a class="nav-link" href="vente.php">Vente</a>
 				<a class="nav-link" href="#contact">Contact</a>
 				<a class="btn-ghost" href="#" data-bs-toggle="modal" data-bs-target="#modal_booking">Réserver</a>
 			</div>

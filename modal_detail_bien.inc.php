@@ -8,7 +8,7 @@
 			</div>
 			<div class="modal-body">
 				<!-- Carrousel photos -->
-				<div id="carouselDetailBien" class="carousel slide mb-4" data-bs-ride="false">
+				<div id="carouselDetailBien" class="carousel slide mb-3" data-bs-ride="false">
 					<div class="carousel-inner" id="modalDetailImages">
 						<!-- Images seront insérées ici -->
 					</div>
@@ -20,11 +20,11 @@
 					</button>
 				</div>
 
-				<!-- Badges statut -->
-				<div class="mb-3">
-					<span class="badge me-2" id="modalDetailStatut"></span>
-					<span class="badge bg-secondary" id="modalDetailActif" style="display: none;">Inactif</span>
+				<!-- Vignettes -->
+				<div id="modalDetailThumbnails" class="thumbnails-container mb-4">
+					<!-- Vignettes seront insérées ici -->
 				</div>
+
 
 				<!-- Informations principales -->
 				<div class="row g-3 mb-3">
