@@ -224,7 +224,9 @@ class Bien {
         $uploadedFiles = [];
 
         foreach ($files['tmp_name'] as $key => $tmpName) {
-            if (empty($tmpName)) continue;
+            if (empty($tmpName)) {
+                continue;
+            }
 
             $originalName = $files['name'][$key];
             $fileSize = $files['size'][$key];

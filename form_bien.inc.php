@@ -42,14 +42,34 @@
 		<label class="form-label fw-bold">Nombre de chambres :</label>
 		<input type="number" class="form-control" name="nb_chambres">
 	</div>
-	<div class="col-md-6 vente-fields">
+	<div class="col-md-6 location-fields">
 		<label class="form-label fw-bold">Nombre de personnes :</label>
 		<input type="number" class="form-control" name="nb_personnes">
 	</div>
-	<div class="col-md-6 location-fields">
+	<div class="col-md-6 vente-fields">
 		<label class="form-label fw-bold">Prix (€) :</label>
 		<input type="number" class="form-control" name="prix">
 	</div>
+</div>
+
+<div class="mb-3">
+	<label class="form-label fw-bold">Photos :</label>
+
+	<!-- Zone de drag & drop -->
+	<div class="image-dropzone">
+		<i class="fa-solid fa-cloud-arrow-up fa-3x mb-3 text-muted"></i>
+		<p class="mb-2">Glissez-déposez vos images ici</p>
+		<p class="text-muted small mb-3">ou</p>
+		<label for="file-input-<?= $mode ?>" class="btn btn-primary btn-sm">
+			<i class="fa-solid fa-folder-open"></i> Parcourir
+		</label>
+		<input type="file" id="file-input-<?= $mode ?>" name="images[]" class="d-none" multiple accept="image/*">
+	</div>
+
+	<div class="form-text mb-3">Formats acceptés: JPG, PNG, WEBP (max 5MB par image)</div>
+
+	<!-- Aperçu des images -->
+	<div class="image-preview-container"></div>
 </div>
 
 <?php if ($mode === 'edit'): ?>
@@ -57,19 +77,8 @@
 	<div id="edit-images-current" class="mb-3"></div>
 <?php endif; ?>
 
-<h6 class="mb-3"><?= $mode === 'edit' ? 'Ajouter des images' : 'Images' ?></h6>
-<div class="mb-3">
-	<?php if ($mode === 'add'): ?>
-		<label class="form-label fw-bold">Photos :</label>
-	<?php endif; ?>
-	<input type="file" class="form-control" name="images[]" multiple accept="image/*">
-	<?php if ($mode === 'add'): ?>
-		<div class="form-text">Formats acceptés: JPG, PNG, WEBP (max 5MB)</div>
-	<?php endif; ?>
-</div>
-
-<div class="<?= $mode === 'edit' ? 'row g-3' : 'mb-3' ?>">
-	<div class="<?= $mode === 'edit' ? 'col-md-6' : '' ?>">
+<div class="row g-3">
+	<div class="col-md-6">
 		<label class="form-label fw-bold">Ordre d'affichage :</label>
 		<input type="number" class="form-control" name="ordre" value="0">
 	</div>

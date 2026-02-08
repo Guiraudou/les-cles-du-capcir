@@ -108,6 +108,8 @@ function handleContactForm(e) {
 // ============================================================
 
 let currentBienId = null;
+// WeakMap pour stocker les fichiers sélectionnés par formulaire
+const selectedFilesMap = new WeakMap();
 
 /**
  * Charge tous les biens
@@ -151,7 +153,7 @@ function displayBiens(biens) {
 		<div class="col-md-6 col-lg-4">
 			<div class="card bien-card h-100">
 				${bien.images && bien.images.length > 0 ? `
-					<img src="../uploads/biens/${bien.images[0].filename}"
+					<img src="${UPLOADS_PATH}${bien.images[0].filename}"
 						 class="bien-image"
 						 alt="${escapeHtml(bien.titre)}">
 				` : `
@@ -160,7 +162,7 @@ function displayBiens(biens) {
 					</div>
 				`}
 
-				<div class="card-body">
+				<div class="card-body d-flex flex-column">
 					<div class="d-flex justify-content-between align-items-start mb-2">
 						<span class="badge ${bien.statut === 'vente' ? 'badge-vente' : 'badge-location'}">
 							${bien.statut.charAt(0).toUpperCase() + bien.statut.slice(1)}
@@ -173,13 +175,13 @@ function displayBiens(biens) {
 					<div class="small text-muted mb-2">
 						${bien.lieu ? `<i class="fa-solid fa-location-dot"></i> ${escapeHtml(bien.lieu)}<br>` : ''}
 						${bien.surface ? `<i class="fa-solid fa-ruler-combined"></i> ${bien.surface} m²` : ''}
-						${bien.statut === 'vente' && bien.nb_chambres ? ` • ${bien.nb_chambres} ch.` : ''}
+						${bien.nb_chambres ? ` • ${bien.nb_chambres} ch.` : ''}
 						${bien.statut === 'location' && bien.nb_personnes ? ` • ${bien.nb_personnes} pers.` : ''}
 					</div>
 
 					${bien.prix ? `<p class="fw-bold fs-5 mb-3">${formatPrice(bien.prix)}</p>` : ''}
 
-					<div class="text-end">
+					<div class="text-end mt-auto">
 						<button class="btn btn-sm btn-warning ms-2" onclick="editBien(${bien.id})">
 							<i class="fa-solid fa-pen"></i>
 						</button>
@@ -211,53 +213,53 @@ function updateStats(biens) {
 }
 
 /**
- * Initialise les formulaires d'administration
+ * Initialise un formulaire de bien (ajout ou édition)
  */
-function initForms() {
-	// Gestion du statut dans le formulaire d'ajout
-	const formAdd = document.getElementById('formAdd');
-	if (formAdd) {
-		const addStatuts = formAdd.querySelectorAll('[name="statut"]');
-		addStatuts.forEach(radio => {
-			radio.addEventListener('change', function() {
-				toggleFieldsByStatut(formAdd, this.value);
-			});
-		});
+function initBienForm(form, isAddForm = false) {
+	if (!form) return;
 
-		// Sélectionner "vente" par défaut
-		const venteRadio = formAdd.querySelector('[name="statut"][value="vente"]');
+	// Gestion du changement de statut
+	const statutRadios = form.querySelectorAll('[name="statut"]');
+	statutRadios.forEach(radio => {
+		radio.addEventListener('change', function() {
+			toggleFieldsByStatut(form, this.value);
+		});
+	});
+
+	// Pour le formulaire d'ajout, sélectionner "vente" par défaut
+	if (isAddForm) {
+		const venteRadio = form.querySelector('[name="statut"][value="vente"]');
 		if (venteRadio) {
 			venteRadio.checked = true;
-			toggleFieldsByStatut(formAdd, 'vente');
+			toggleFieldsByStatut(form, 'vente');
 		}
 	}
 
-	// Gestion du statut dans le formulaire d'édition
-	const formEdit = document.getElementById('formEdit');
-	if (formEdit) {
-		const editStatuts = formEdit.querySelectorAll('[name="statut"]');
-		editStatuts.forEach(radio => {
-			radio.addEventListener('change', function() {
-				toggleFieldsByStatut(formEdit, this.value);
-			});
-		});
-	}
+	// Initialiser l'upload d'images
+	initImageUpload(form);
 
-	// Soumission du formulaire d'ajout
-	if (formAdd) {
-		formAdd.addEventListener('submit', function(e) {
-			e.preventDefault();
+	// Gestion de la soumission
+	form.addEventListener('submit', function(e) {
+		e.preventDefault();
+		if (isAddForm) {
 			submitAddForm();
-		});
-	}
-
-	// Soumission du formulaire d'édition
-	if (formEdit) {
-		formEdit.addEventListener('submit', function(e) {
-			e.preventDefault();
+		} else {
 			submitEditForm();
-		});
-	}
+		}
+	});
+}
+
+/**
+ * Initialise les formulaires d'administration
+ */
+function initForms() {
+	// Initialiser le formulaire d'ajout
+	const formAdd = document.getElementById('formAdd');
+	initBienForm(formAdd, true);
+
+	// Initialiser le formulaire d'édition
+	const formEdit = document.getElementById('formEdit');
+	initBienForm(formEdit, false);
 
 	// Confirmation de suppression
 	const btnConfirmDelete = document.getElementById('btnConfirmDelete');
@@ -266,6 +268,136 @@ function initForms() {
 			deleteBien(currentBienId);
 		});
 	}
+}
+
+/**
+ * Initialise l'upload d'images avec drag & drop
+ */
+function initImageUpload(form) {
+	if (!form) return;
+
+	// Initialiser le tableau de fichiers pour ce formulaire
+	selectedFilesMap.set(form, []);
+
+	const dropzone = form.querySelector('.image-dropzone');
+	const fileInput = form.querySelector('input[type="file"][name="images[]"]');
+	const previewContainer = form.querySelector('.image-preview-container');
+
+	if (!dropzone || !fileInput || !previewContainer) return;
+
+	// Click sur la dropzone pour ouvrir le sélecteur de fichiers
+	dropzone.addEventListener('click', (e) => {
+		if (e.target.tagName !== 'INPUT') {
+			fileInput.click();
+		}
+	});
+
+	// Changement de fichier via le bouton parcourir
+	fileInput.addEventListener('change', (e) => {
+		handleFiles(e.target.files, form);
+	});
+
+	// Drag & drop events
+	['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+		dropzone.addEventListener(eventName, preventDefaults, false);
+	});
+
+	function preventDefaults(e) {
+		e.preventDefault();
+		e.stopPropagation();
+	}
+
+	['dragenter', 'dragover'].forEach(eventName => {
+		dropzone.addEventListener(eventName, () => {
+			dropzone.classList.add('dragover');
+		}, false);
+	});
+
+	['dragleave', 'drop'].forEach(eventName => {
+		dropzone.addEventListener(eventName, () => {
+			dropzone.classList.remove('dragover');
+		}, false);
+	});
+
+	dropzone.addEventListener('drop', (e) => {
+		const dt = e.dataTransfer;
+		const files = dt.files;
+		handleFiles(files, form);
+	}, false);
+}
+
+/**
+ * Gère les fichiers sélectionnés
+ */
+function handleFiles(files, form) {
+	const filesArray = Array.from(files);
+
+	// Filtrer les fichiers image
+	const imageFiles = filesArray.filter(file => file.type.startsWith('image/'));
+
+	// Vérifier la taille (max 5MB)
+	const validFiles = imageFiles.filter(file => {
+		if (file.size > 5 * 1024 * 1024) {
+			showModalAlert(
+				form,
+				`L'image ${file.name} dépasse 5MB`,
+				'warning'
+			);
+			return false;
+		}
+		return true;
+	});
+
+	// Ajouter les fichiers à la liste
+	const currentFiles = selectedFilesMap.get(form) || [];
+	selectedFilesMap.set(form, [...currentFiles, ...validFiles]);
+
+	// Afficher l'aperçu
+	displayImagePreviews(form);
+}
+
+/**
+ * Affiche l'aperçu des images
+ */
+function displayImagePreviews(form) {
+	const previewContainer = form.querySelector('.image-preview-container');
+	if (!previewContainer) return;
+
+	previewContainer.innerHTML = '';
+
+	const files = selectedFilesMap.get(form) || [];
+	files.forEach((file, index) => {
+		const reader = new FileReader();
+		reader.onload = (e) => {
+			const previewItem = document.createElement('div');
+			previewItem.className = 'preview-item';
+			previewItem.innerHTML = `
+				<img src="${e.target.result}" alt="Preview">
+				<button type="button" class="remove-preview" data-index="${index}">
+					<i class="fa-solid fa-times"></i>
+				</button>
+			`;
+
+			// Ajouter l'événement de suppression
+			const removeBtn = previewItem.querySelector('.remove-preview');
+			removeBtn.addEventListener('click', () => {
+				removeImagePreview(form, index);
+			});
+
+			previewContainer.appendChild(previewItem);
+		};
+		reader.readAsDataURL(file);
+	});
+}
+
+/**
+ * Supprime une image de l'aperçu
+ */
+function removeImagePreview(form, index) {
+	const files = selectedFilesMap.get(form) || [];
+	files.splice(index, 1);
+	selectedFilesMap.set(form, files);
+	displayImagePreviews(form);
 }
 
 /**
@@ -295,6 +427,15 @@ function submitAddForm() {
 	const formData = new FormData(form);
 	formData.append('action', 'create');
 
+	// Supprimer l'input file vide et ajouter les fichiers sélectionnés
+	formData.delete('images[]');
+	const files = selectedFilesMap.get(form) || [];
+	if (files.length > 0) {
+		files.forEach(file => {
+			formData.append('images[]', file, file.name);
+		});
+	}
+
 	fetch('api/biens.php', {
 		method: 'POST',
 		body: formData
@@ -305,6 +446,9 @@ function submitAddForm() {
 			showAlert('Bien ajouté avec succès !', 'success');
 			bootstrap.Modal.getInstance(document.getElementById('modalAdd')).hide();
 			form.reset();
+			selectedFilesMap.set(form, []);
+			const previewContainer = form.querySelector('.image-preview-container');
+			if (previewContainer) previewContainer.innerHTML = '';
 			loadBiens();
 		} else {
 			showModalAlert(form, data.message || 'Erreur lors de l\'ajout', 'danger');
@@ -367,6 +511,11 @@ function fillEditForm(bien) {
 	// Afficher les champs selon le statut
 	toggleFieldsByStatut(form, bien.statut);
 
+	// Réinitialiser les fichiers sélectionnés
+	selectedFilesMap.set(form, []);
+	const previewContainer = form.querySelector('.image-preview-container');
+	if (previewContainer) previewContainer.innerHTML = '';
+
 	// Afficher les images actuelles
 	displayCurrentImages(bien.id, bien.images || []);
 }
@@ -385,7 +534,7 @@ function displayCurrentImages(bienId, images) {
 
 	container.innerHTML = images.map(img => `
 		<div class="image-preview">
-			<img src="../uploads/biens/${img.filename}" alt="Image">
+			<img src="${UPLOADS_PATH}${img.filename}" alt="Image">
 			<button type="button" class="btn btn-danger btn-sm btn-remove"
 					onclick="deleteImage(${bienId}, '${img.filename}')">
 				<i class="fa-solid fa-times"></i>
@@ -432,6 +581,15 @@ function submitEditForm() {
 	const formData = new FormData(form);
 	formData.append('action', 'update');
 
+	// Supprimer l'input file vide et ajouter les fichiers sélectionnés
+	formData.delete('images[]');
+	const files = selectedFilesMap.get(form) || [];
+	if (files.length > 0) {
+		files.forEach(file => {
+			formData.append('images[]', file, file.name);
+		});
+	}
+
 	fetch('api/biens.php', {
 		method: 'POST',
 		body: formData
@@ -441,6 +599,9 @@ function submitEditForm() {
 		if (data.success) {
 			showAlert('Bien mis à jour avec succès !', 'success');
 			bootstrap.Modal.getInstance(document.getElementById('modalEdit')).hide();
+			selectedFilesMap.set(form, []);
+			const previewContainer = form.querySelector('.image-preview-container');
+			if (previewContainer) previewContainer.innerHTML = '';
 			loadBiens();
 		} else {
 			showModalAlert(form, data.message || 'Erreur lors de la mise à jour', 'danger');

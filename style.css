@@ -743,3 +743,72 @@ footer .border-top{
 	padding: 0;
 	border-radius: 50%;
 }
+
+/* Zone de drag & drop pour les images */
+.image-dropzone {
+	border: 2px dashed #ccc;
+	border-radius: 8px;
+	padding: 2rem;
+	text-align: center;
+	background: #f8f9fa;
+	transition: all 0.3s ease;
+	cursor: pointer;
+}
+
+.image-dropzone:hover {
+	border-color: #0d6efd;
+	background: #e7f1ff;
+}
+
+.image-dropzone.dragover {
+	border-color: #0d6efd;
+	background: #e7f1ff;
+	transform: scale(1.02);
+}
+
+/* Container pour l'aperçu des images */
+.image-preview-container {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 10px;
+	margin-top: 1rem;
+}
+
+.image-preview-container .preview-item {
+	position: relative;
+	width: 120px;
+	height: 120px;
+	border: 2px solid #dee2e6;
+	border-radius: 8px;
+	overflow: hidden;
+	background: #fff;
+}
+
+.image-preview-container .preview-item img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+.image-preview-container .preview-item .remove-preview {
+	position: absolute;
+	top: 5px;
+	right: 5px;
+	width: 28px;
+	height: 28px;
+	padding: 0;
+	border-radius: 50%;
+	background: rgba(220, 53, 69, 0.9);
+	border: 2px solid white;
+	color: white;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	cursor: pointer;
+	transition: all 0.2s;
+}
+
+.image-preview-container .preview-item .remove-preview:hover {
+	background: #dc3545;
+	transform: scale(1.1);
+}
