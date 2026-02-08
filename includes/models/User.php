@@ -9,8 +9,8 @@ require_once __DIR__ . '/../JsonDB.php';
 
 class User
 {
-	private $db;
-	private const FILENAME = 'users.json';
+	private JsonDB $db;
+	private const string FILENAME = 'users.json';
 
 	public function __construct()
 	{
@@ -20,7 +20,7 @@ class User
 	/**
 	 * Authentifie un utilisateur et démarre sa session
 	 */
-	public function authenticate($username, $password): bool
+	public function authenticate(string $username, string $password): bool
 	{
 		$user = $this->getByUsername($username);
 
@@ -39,7 +39,7 @@ class User
 	/**
 	 * Récupère tous les utilisateurs
 	 */
-	public function getAll()
+	public function getAll(): array
 	{
 		return $this->db->read(self::FILENAME);
 	}
@@ -47,7 +47,7 @@ class User
 	/**
 	 * Récupère un utilisateur par son ID
 	 */
-	public function getById($id)
+	public function getById(int $id): ?array
 	{
 		$users = $this->db->read(self::FILENAME);
 		foreach ($users as $user) {
@@ -61,7 +61,7 @@ class User
 	/**
 	 * Récupère un utilisateur par son username
 	 */
-	public function getByUsername($username)
+	public function getByUsername(string $username): ?array
 	{
 		$users = $this->db->read(self::FILENAME);
 		foreach ($users as $user) {
@@ -75,7 +75,7 @@ class User
 	/**
 	 * Crée un nouvel utilisateur
 	 */
-	public function create($username, $password, $email = null)
+	public function create(string $username, string $password, ?string $email = null): int
 	{
 		// Vérifier si l'utilisateur existe déjà
 		if ($this->getByUsername($username)) {
@@ -109,7 +109,7 @@ class User
 	/**
 	 * Met à jour le mot de passe d'un utilisateur
 	 */
-	public function updatePassword($userId, $newPassword)
+	public function updatePassword(int $userId, string $newPassword): bool
 	{
 		if (strlen($newPassword) < 6) {
 			throw new Exception('Le mot de passe doit contenir au moins 6 caractères');
@@ -136,7 +136,7 @@ class User
 	/**
 	 * Met à jour les informations d'un utilisateur
 	 */
-	public function update($userId, $data)
+	public function update(int $userId, array $data): bool
 	{
 		$users = $this->db->read(self::FILENAME);
 		$updated = false;
@@ -164,7 +164,7 @@ class User
 	/**
 	 * Supprime un utilisateur
 	 */
-	public function delete($userId)
+	public function delete(int $userId): bool
 	{
 		$users = $this->db->read(self::FILENAME);
 
@@ -173,18 +173,17 @@ class User
 			throw new Exception('Impossible de supprimer le dernier utilisateur');
 		}
 
-		$users = array_filter($users, function ($user) use ($userId) {
-			return $user['id'] != $userId;
-		});
+		$users = array_filter($users, fn ($user) => $user['id'] !== $userId);
 
 		$this->db->write(self::FILENAME, array_values($users));
+
 		return true;
 	}
 
 	/**
 	 * Démarre une session utilisateur
 	 */
-	public function startSession($user)
+	public function startSession(array $user): void
 	{
 		$_SESSION['admin_id'] = $user['id'];
 		$_SESSION['admin_username'] = $user['username'];
@@ -202,7 +201,7 @@ class User
 	/**
 	 * Récupère l'utilisateur actuellement connecté
 	 */
-	public function getCurrentUser()
+	public function getCurrentUser(): ?array
 	{
 		if (!$this->isLoggedIn()) {
 			return null;
@@ -214,7 +213,7 @@ class User
 	/**
 	 * Déconnecte l'utilisateur
 	 */
-	public function logout()
+	public function logout(): void
 	{
 		session_unset();
 		session_destroy();
@@ -223,7 +222,7 @@ class User
 	/**
 	 * Requiert une authentification (redirige vers login si non connecté)
 	 */
-	public function requireAuth()
+	public function requireAuth(): void
 	{
 		if (!$this->isLoggedIn()) {
 			header('Location: login.php');
@@ -234,7 +233,7 @@ class User
 	/**
 	 * Génère le prochain ID disponible
 	 */
-	private function generateNextId($users)
+	private function generateNextId($users): int
 	{
 		if (empty($users)) {
 			return 1;
@@ -246,7 +245,7 @@ class User
 	/**
 	 * Formate les données d'un utilisateur pour l'affichage (sans le mot de passe)
 	 */
-	public function format($user)
+	public function format($user): array
 	{
 		return [
 			'id' => $user['id'],

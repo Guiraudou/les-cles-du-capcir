@@ -53,9 +53,20 @@ $userModel->requireAuth();
 		</div>
 	</div>
 
-	<!-- Actions -->
-	<div class="d-flex justify-content-between align-items-center mb-4">
-		<h2>Gestion des biens</h2>
+	<!-- Filtres / Actions -->
+	<div class="d-flex justify-content-between align-items-center mb-3">
+		<div class="btn-group" role="group">
+			<button type="button" class="btn btn-outline-primary active" data-filter="all">
+				Tous
+			</button>
+			<button type="button" class="btn btn-outline-primary" data-filter="vente">
+				Ventes
+			</button>
+			<button type="button" class="btn btn-outline-primary" data-filter="location">
+				Locations
+			</button>
+		</div>
+
 		<button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#modalAdd">
 			<i class="fa-solid fa-plus"></i> Ajouter un bien
 		</button>
@@ -145,5 +156,7 @@ $userModel->requireAuth();
 		</div>
 	</div>
 </div>
+
+<?php include 'modal_detail_bien.inc.php'; ?>
 
 <?php require_once 'footer.inc.php'; ?>

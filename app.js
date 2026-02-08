@@ -108,6 +108,9 @@ function handleContactForm(e) {
 // ============================================================
 
 let currentBienId = null;
+let allBiens = []; // Stocke tous les biens
+let currentFilter = 'all'; // Filtre actuel
+
 // WeakMap pour stocker les fichiers sélectionnés par formulaire
 const selectedFilesMap = new WeakMap();
 
@@ -119,7 +122,8 @@ function loadBiens() {
 		.then(response => response.json())
 		.then(data => {
 			if (data.success) {
-				displayBiens(data.data);
+				allBiens = data.data;
+				applyFilter();
 				updateStats(data.data);
 			} else {
 				showAlert('Erreur lors du chargement des biens', 'danger');
@@ -129,6 +133,22 @@ function loadBiens() {
 			console.error('Erreur:', error);
 			showAlert('Erreur de connexion', 'danger');
 		});
+}
+
+/**
+ * Applique le filtre actuel sur les biens
+ */
+function applyFilter() {
+	let filteredBiens = allBiens;
+
+	if (currentFilter === 'vente') {
+		filteredBiens = allBiens.filter(b => b.statut === 'vente');
+	}
+	else if (currentFilter === 'location') {
+		filteredBiens = allBiens.filter(b => b.statut === 'location');
+	}
+
+	displayBiens(filteredBiens);
 }
 
 /**
@@ -153,7 +173,7 @@ function displayBiens(biens) {
 		<div class="col-md-6 col-lg-4">
 			<div class="card bien-card h-100">
 				${bien.images && bien.images.length > 0 ? `
-					<img src="${UPLOADS_PATH}${bien.images[0].filename}"
+					<img src="${bien.images[0].url}"
 						 class="bien-image"
 						 alt="${escapeHtml(bien.titre)}">
 				` : `
@@ -163,11 +183,14 @@ function displayBiens(biens) {
 				`}
 
 				<div class="card-body d-flex flex-column">
-					<div class="d-flex justify-content-between align-items-start mb-2">
-						<span class="badge ${bien.statut === 'vente' ? 'badge-vente' : 'badge-location'}">
-							${bien.statut.charAt(0).toUpperCase() + bien.statut.slice(1)}
-						</span>
-						${bien.actif == 0 ? '<span class="badge bg-secondary">Inactif</span>' : ''}
+					<div class="d-flex justify-content-between align-items-center mb-2">
+						<div class="d-flex gap-2 align-items-center">
+							<span class="badge ${bien.statut === 'vente' ? 'badge-vente' : 'badge-location'}">
+								${bien.statut.charAt(0).toUpperCase() + bien.statut.slice(1)}
+							</span>
+							${bien.actif == 0 ? '<span class="badge bg-secondary">Inactif</span>' : ''}
+						</div>
+						${bien.prix ? `<span class="fw-bold fs-5">${formatPrice(bien.prix)}</span>` : ''}
 					</div>
 
 					<h5 class="card-title">${escapeHtml(bien.titre)}</h5>
@@ -179,9 +202,10 @@ function displayBiens(biens) {
 						${bien.statut === 'location' && bien.nb_personnes ? ` • ${bien.nb_personnes} pers.` : ''}
 					</div>
 
-					${bien.prix ? `<p class="fw-bold fs-5 mb-3">${formatPrice(bien.prix)}</p>` : ''}
-
 					<div class="text-end mt-auto">
+						<button class="btn btn-sm btn-info ms-2" onclick="showDetailModal(${bien.id})">
+							<i class="fa-solid fa-eye"></i>
+						</button>
 						<button class="btn btn-sm btn-warning ms-2" onclick="editBien(${bien.id})">
 							<i class="fa-solid fa-pen"></i>
 						</button>
@@ -268,6 +292,26 @@ function initForms() {
 			deleteBien(currentBienId);
 		});
 	}
+}
+
+/**
+ * Initialise les filtres
+ */
+function initFilters() {
+	const filterButtons = document.querySelectorAll('[data-filter]');
+	filterButtons.forEach(btn => {
+		btn.addEventListener('click', function() {
+			// Retirer la classe active de tous les boutons
+			filterButtons.forEach(b => b.classList.remove('active'));
+
+			// Ajouter la classe active au bouton cliqué
+			this.classList.add('active');
+
+			// Appliquer le filtre
+			currentFilter = this.getAttribute('data-filter');
+			applyFilter();
+		});
+	});
 }
 
 /**
@@ -534,7 +578,7 @@ function displayCurrentImages(bienId, images) {
 
 	container.innerHTML = images.map(img => `
 		<div class="image-preview">
-			<img src="${UPLOADS_PATH}${img.filename}" alt="Image">
+			<img src="${img.url}" alt="Image">
 			<button type="button" class="btn btn-danger btn-sm btn-remove"
 					onclick="deleteImage(${bienId}, '${img.filename}')">
 				<i class="fa-solid fa-times"></i>
@@ -611,6 +655,81 @@ function submitEditForm() {
 		console.error('Erreur:', error);
 		showModalAlert(form, 'Erreur de connexion', 'danger');
 	});
+}
+
+/**
+ * Affiche le modal de détails d'un bien
+ */
+function showDetailModal(id) {
+	fetch(`api/biens.php?action=get&id=${id}`)
+		.then(response => response.json())
+		.then(data => {
+			if (data.success) {
+				displayBienDetail(data.data);
+			} else {
+				showAlert('Erreur lors du chargement des détails', 'danger');
+			}
+		})
+		.catch(error => {
+			console.error('Erreur:', error);
+			showAlert('Erreur de connexion', 'danger');
+		});
+}
+
+/**
+ * Affiche les détails d'un bien dans la modal
+ */
+function displayBienDetail(bien) {
+	// Titre
+	document.getElementById('modalDetailBienTitle').textContent = bien.titre;
+
+	// Badge statut
+	const statutBadge = document.getElementById('modalDetailStatut');
+	statutBadge.textContent = bien.statut.charAt(0).toUpperCase() + bien.statut.slice(1);
+	statutBadge.className = `badge me-2 ${bien.statut === 'vente' ? 'badge-vente' : 'badge-location'}`;
+
+	// Badge inactif
+	const inactifBadge = document.getElementById('modalDetailActif');
+	inactifBadge.style.display = bien.actif == 0 ? 'inline-block' : 'none';
+
+	// Images - Carrousel
+	const imagesContainer = document.getElementById('modalDetailImages');
+	if (bien.images && bien.images.length > 0) {
+		imagesContainer.innerHTML = bien.images.map((img, index) => `
+			<div class="carousel-item ${index === 0 ? 'active' : ''}">
+				<img src="${img.url}" class="d-block w-100" alt="${escapeHtml(bien.titre)}" style="max-height: 500px; object-fit: contain;">
+			</div>
+		`).join('');
+	} else {
+		imagesContainer.innerHTML = `
+			<div class="carousel-item active">
+				<div class="bg-secondary d-flex align-items-center justify-content-center text-white" style="height: 500px;">
+					<i class="fa-solid fa-image fa-5x opacity-50"></i>
+				</div>
+			</div>
+		`;
+	}
+
+	// Informations
+	document.getElementById('modalDetailLieu').textContent = bien.lieu || 'Non renseigné';
+	document.getElementById('modalDetailSurface').textContent = bien.surface ? `${bien.surface} m²` : 'Non renseigné';
+	document.getElementById('modalDetailChambres').textContent = bien.nb_chambres || 'Non renseigné';
+	document.getElementById('modalDetailPersonnes').textContent = bien.nb_personnes || 'Non renseigné';
+
+	// Prix
+	const prixContainer = document.getElementById('modalDetailPrixContainer');
+	if (bien.prix) {
+		prixContainer.style.display = 'block';
+		document.getElementById('modalDetailPrix').textContent = formatPrice(bien.prix);
+	} else {
+		prixContainer.style.display = 'none';
+	}
+
+	// Description
+	document.getElementById('modalDetailDescription').textContent = bien.description || 'Aucune description';
+
+	// Afficher la modal
+	new bootstrap.Modal(document.getElementById('modalDetailBien')).show();
 }
 
 /**
@@ -799,5 +918,6 @@ document.addEventListener('DOMContentLoaded', function() {
 	if (biensList) {
 		loadBiens();
 		initForms();
+		initFilters();
 	}
 });

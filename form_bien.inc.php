@@ -60,10 +60,8 @@
 		<i class="fa-solid fa-cloud-arrow-up fa-3x mb-3 text-muted"></i>
 		<p class="mb-2">Glissez-déposez vos images ici</p>
 		<p class="text-muted small mb-3">ou</p>
-		<label for="file-input-<?= $mode ?>" class="btn btn-primary btn-sm">
-			<i class="fa-solid fa-folder-open"></i> Parcourir
-		</label>
-		<input type="file" id="file-input-<?= $mode ?>" name="images[]" class="d-none" multiple accept="image/*">
+		<label class="btn btn-primary btn-sm"><i class="fa-solid fa-folder-open"></i> Parcourir</label>
+		<input type="file" name="images[]" class="d-none" multiple accept="image/*">
 	</div>
 
 	<div class="form-text mb-3">Formats acceptés: JPG, PNG, WEBP (max 5MB par image)</div>

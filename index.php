@@ -16,7 +16,7 @@ $locations = array_slice(array_filter($allBiens, fn ($b) => $b['statut'] === 'lo
 <nav id="stickyNav" class="navbar navbar-expand-lg sticky-nav">
 	<div class="container py-1">
 		<a class="navbar-brand" href="#top">
-			<img src="data/logo.png" alt="Les clés du Capcir">
+			<img src="images/logo.png" alt="Les clés du Capcir">
 			Les clés du Capcir
 		</a>
 
@@ -43,7 +43,7 @@ $locations = array_slice(array_filter($allBiens, fn ($b) => $b['statut'] === 'lo
 
 	<!-- Logo en haut à gauche -->
 	<div class="hero-logo-corner">
-		<img src="data/logo.png" alt="Les clés du Capcir">
+		<img src="images/logo.png" alt="Les clés du Capcir">
 	</div>
 
 	<!-- integrated menu in hero -->
@@ -190,10 +190,13 @@ $locations = array_slice(array_filter($allBiens, fn ($b) => $b['statut'] === 'lo
 							<?php foreach ($ventes as $bien): ?>
 								<div class="col-12">
 									<div class="listing">
-										<?php
-										$firstImage = !empty($bien['images']) ? $bien['images'][0] : 'https://images.unsplash.com/photo-1449844908441-8829872d2607?auto=format&fit=crop&w=1600&q=80';
-										?>
-										<img src="<?= htmlspecialchars($firstImage) ?>" alt="<?= htmlspecialchars($bien['titre']) ?>">
+										<?php if (!empty($bien['images'])): ?>
+											<img src="<?= htmlspecialchars($bien['images'][0]['url']) ?>" alt="<?= htmlspecialchars($bien['titre']) ?>">
+										<?php else: ?>
+											<div class="listing-image-placeholder bg-secondary d-flex align-items-center justify-content-center text-white">
+												<i class="fa-solid fa-image fa-3x opacity-50"></i>
+											</div>
+										<?php endif; ?>
 										<div class="body">
 											<div class="fw-bold">
 												<?= htmlspecialchars($bien['titre']) ?>
@@ -216,7 +219,7 @@ $locations = array_slice(array_filter($allBiens, fn ($b) => $b['statut'] === 'lo
 												<div class="fw-bold text-success mb-2"><?= number_format($bien['prix'], 0, ',', ' ') ?> €</div>
 											<?php endif; ?>
 											<div class="d-flex gap-2">
-												<a class="btn btn-outline-sapin btn-sm btn-details" href="vente.html">Détails</a>
+												<button type="button" class="btn btn-outline-sapin btn-sm" onclick="showDetailModal(<?= $bien['id'] ?>)">Détails</button>
 												<a class="btn btn-sapin btn-sm" href="#contact">Infos / visite</a>
 											</div>
 										</div>
@@ -247,10 +250,13 @@ $locations = array_slice(array_filter($allBiens, fn ($b) => $b['statut'] === 'lo
 							<?php foreach ($locations as $bien): ?>
 								<div class="col-12">
 									<div class="listing">
-										<?php
-										$firstImage = !empty($bien['images']) ? $bien['images'][0] : 'https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=1600&q=80';
-										?>
-										<img src="<?= htmlspecialchars($firstImage) ?>" alt="<?= htmlspecialchars($bien['titre']) ?>">
+										<?php if (!empty($bien['images'])): ?>
+											<img src="<?= htmlspecialchars($bien['images'][0]['url']) ?>" alt="<?= htmlspecialchars($bien['titre']) ?>">
+										<?php else: ?>
+											<div class="listing-image-placeholder bg-secondary d-flex align-items-center justify-content-center text-white">
+												<i class="fa-solid fa-image fa-3x opacity-50"></i>
+											</div>
+										<?php endif; ?>
 										<div class="body">
 											<div class="fw-bold">
 												<?= htmlspecialchars($bien['titre']) ?>
@@ -270,7 +276,7 @@ $locations = array_slice(array_filter($allBiens, fn ($b) => $b['statut'] === 'lo
 												<?php endif; ?>
 											</div>
 											<div class="d-flex gap-2">
-												<a class="btn btn-outline-sapin btn-sm" href="locations.html">Détails</a>
+												<button type="button" class="btn btn-outline-sapin btn-sm" onclick="showDetailModal(<?= $bien['id'] ?>)">Détails</button>
 												<a class="btn btn-sapin btn-sm" href="#" data-bs-toggle="modal" data-bs-target="#modal_booking">Réserver</a>
 											</div>
 										</div>
@@ -360,7 +366,7 @@ $locations = array_slice(array_filter($allBiens, fn ($b) => $b['statut'] === 'lo
 
 			<!-- Colonne 2 : Logo et titre (centre) -->
 			<div class="col-12 col-md-4 text-center order-1 order-md-2">
-				<img src="data/logo_white.png" alt="Les clés du Capcir" class="footer-logo">
+				<img src="images/logo_white.png" alt="Les clés du Capcir" class="footer-logo">
 				<h5 class="fw-bold mb-2">Les clés du Capcir</h5>
 				<p class="text-muted small mb-3">Vente & Conciergerie au cœur du Capcir</p>
 				
@@ -431,5 +437,7 @@ $locations = array_slice(array_filter($allBiens, fn ($b) => $b['statut'] === 'lo
 </div>
 
 <?php include 'booking.inc.php'; ?>
+
+<?php include 'modal_detail_bien.inc.php'; ?>
 
 <?php require_once 'footer.inc.php'; ?>
