@@ -150,3 +150,38 @@
 		</div>
 	</div>
 </div>
+
+<!-- Modal Confirmation Synchronisation Smoobu -->
+<div class="modal fade" id="modalSyncSmoobu" tabindex="-1" aria-labelledby="modalSyncSmoobuLabel" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="modalSyncSmoobuLabel">
+					<i class="fa-solid fa-sync"></i> Synchroniser avec Smoobu
+				</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+			</div>
+			<div class="modal-body">
+				<div class="alert alert-info">
+					<i class="fa-solid fa-info-circle"></i> Cette opération va :
+				</div>
+				<ul class="mb-3">
+					<li><strong>Créer une sauvegarde</strong> de vos données actuelles</li>
+					<li><strong>Ajouter</strong> les nouveaux biens Smoobu</li>
+					<li><strong>Mettre à jour</strong> les biens existants (conserve statut actif et ordre)</li>
+				</ul>
+				<p class="text-muted small mb-0">
+					Seule la partie location est synchronisée avec Smoobu.
+				</p>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+					<i class="fa-solid fa-times"></i> Annuler
+				</button>
+				<button type="button" class="btn btn-info" id="btnConfirmSync">
+					<i class="fa-solid fa-sync"></i> Synchroniser
+				</button>
+			</div>
+		</div>
+	</div>
+</div>

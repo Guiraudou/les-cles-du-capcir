@@ -89,6 +89,7 @@ class Bien
 			'images' => [],
 			'actif' => 1,
 			'ordre' => isset($data['ordre']) ? intval($data['ordre']) : 0,
+			'id_smoobu' => $data['id_smoobu'] ?? null,
 			'created_at' => date('Y-m-d H:i:s'),
 			'updated_at' => date('Y-m-d H:i:s')
 		];
@@ -121,6 +122,7 @@ class Bien
 				$bien['prix'] = isset($data['prix']) ? floatval($data['prix']) : null;
 				$bien['actif'] = isset($data['actif']) ? intval($data['actif']) : $bien['actif'];
 				$bien['ordre'] = isset($data['ordre']) ? intval($data['ordre']) : $bien['ordre'];
+				$bien['id_smoobu'] = isset($data['id_smoobu']) ? $data['id_smoobu'] : ($bien['id_smoobu'] ?? null);
 				$bien['updated_at'] = date('Y-m-d H:i:s');
 				$updated = true;
 				break;
@@ -322,6 +324,34 @@ class Bien
 		if (isset($data['surface']) && $data['surface'] !== '' && $data['surface'] !== null && !is_numeric($data['surface'])) {
 			throw new Exception('La surface doit être un nombre');
 		}
+	}
+
+	/**
+	 * Crée une sauvegarde de biens.json
+	 */
+	public function backup(): string
+	{
+		$dataDir = $this->db->getDataDirectory();
+		$oldDir = $dataDir . '/old';
+
+		// Créer le dossier old s'il n'existe pas
+		if (!file_exists($oldDir)) {
+			mkdir($oldDir, 0755, true);
+		}
+
+		// Générer un nom unique pour la sauvegarde
+		$timestamp = date('Ymd_His');
+		$uniqueId = uniqid();
+		$backupFilename = "biens_{$timestamp}_{$uniqueId}.json";
+		$backupPath = $oldDir . '/' . $backupFilename;
+
+		// Copier le fichier
+		$sourceFile = $dataDir . '/biens.json';
+		if (file_exists($sourceFile)) {
+			copy($sourceFile, $backupPath);
+		}
+
+		return $backupFilename;
 	}
 
 	/**

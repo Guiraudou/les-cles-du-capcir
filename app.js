@@ -115,6 +115,82 @@ let currentFilter = 'all'; // Filtre actuel
 const selectedFilesMap = new WeakMap();
 
 /**
+ * Ouvre le modal de confirmation de synchronisation Smoobu
+ */
+function syncSmoobu() {
+	const modal = new bootstrap.Modal(document.getElementById('modalSyncSmoobu'));
+	modal.show();
+}
+
+/**
+ * Exécute la synchronisation avec Smoobu
+ */
+function executeSyncSmoobu() {
+	const modal = bootstrap.Modal.getInstance(document.getElementById('modalSyncSmoobu'));
+	const btn = document.getElementById('btnSyncSmoobu');
+	const confirmBtn = document.getElementById('btnConfirmSync');
+
+	if (!btn || !confirmBtn) return;
+
+	// Fermer le modal
+	modal.hide();
+
+	// Désactiver les boutons pendant la synchro
+	const originalHtml = btn.innerHTML;
+	const originalConfirmHtml = confirmBtn.innerHTML;
+	btn.disabled = true;
+	confirmBtn.disabled = true;
+	btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Synchronisation...';
+	confirmBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> En cours...';
+
+	const formData = new FormData();
+	formData.append('action', 'synchronize');
+
+	fetch('api/smoobu.php', {
+		method: 'POST',
+		body: formData
+	})
+	.then(response => response.json())
+	.then(data => {
+		if (data.success) {
+			const stats = data.stats;
+			const details = [];
+
+			if (stats.added > 0) details.push(`${stats.added} ajouté(s)`);
+			if (stats.updated > 0) details.push(`${stats.updated} mis à jour`);
+			if (stats.skipped > 0) details.push(`${stats.skipped} ignoré(s)`);
+
+			let message = `Synchronisation terminée !\n\n${details.join(', ')}\n`;
+
+			if (stats.errors && stats.errors.length > 0) {
+				message += `\nErreurs :\n${stats.errors.join('\n')}`;
+			}
+
+			message += `\n\nSauvegarde créée : ${data.backup}`;
+
+			alert(message);
+			showAlert(data.message, 'success');
+			loadBiens();
+		} else {
+			showAlert(data.message || 'Erreur lors de la synchronisation', 'danger');
+			if (data.error) {
+				console.error('Erreur de synchronisation:', data.error);
+			}
+		}
+	})
+	.catch(error => {
+		console.error('Erreur:', error);
+		showAlert('Erreur de connexion lors de la synchronisation', 'danger');
+	})
+	.finally(() => {
+		btn.disabled = false;
+		confirmBtn.disabled = false;
+		btn.innerHTML = originalHtml;
+		confirmBtn.innerHTML = originalConfirmHtml;
+	});
+}
+
+/**
  * Charge tous les biens
  */
 function loadBiens() {
@@ -1111,5 +1187,11 @@ document.addEventListener('DOMContentLoaded', function() {
 		loadBiens();
 		initForms();
 		initFilters();
+	}
+
+	// Bouton de confirmation de synchronisation Smoobu
+	const btnConfirmSync = document.getElementById('btnConfirmSync');
+	if (btnConfirmSync) {
+		btnConfirmSync.addEventListener('click', executeSyncSmoobu);
 	}
 });

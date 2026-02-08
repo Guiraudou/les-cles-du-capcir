@@ -50,9 +50,14 @@ $userModel->requireAuth();
 			</button>
 		</div>
 
-		<button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#modalAdd">
-			<i class="fa-solid fa-plus"></i> Ajouter un bien
-		</button>
+		<div class="d-flex gap-2">
+			<button class="btn btn-info btn-sm" id="btnSyncSmoobu" onclick="syncSmoobu()">
+				<i class="fa-solid fa-sync"></i> Synchroniser Smoobu
+			</button>
+			<button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#modalAdd">
+				<i class="fa-solid fa-plus"></i> Ajouter un bien
+			</button>
+		</div>
 	</div>
 
 	<!-- Alert zone -->
