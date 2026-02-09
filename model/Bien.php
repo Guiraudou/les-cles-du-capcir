@@ -53,9 +53,9 @@ class Bien
 	/**
 	 * Récupère un bien par son ID
 	 */
-	public function getById(int $id): ?array
+	public function getById(int $id, bool $actif = false): ?array
 	{
-		$biens = $this->getAll(null, false);
+		$biens = $this->getAll(null, $actif);
 		foreach ($biens as $bien) {
 			if ($bien['id'] == $id) {
 				return $bien;

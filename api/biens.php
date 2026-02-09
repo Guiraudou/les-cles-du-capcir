@@ -8,18 +8,23 @@ use Osimatic\API\Smoobu;
  * API AJAX pour la gestion des biens
  */
 
-// Vérifier l'authentification
+header('Content-Type: application/json; charset=utf-8');
+
 $userModel = new User();
-if (!$userModel->isLoggedIn()) {
+$isAuthenticated = $userModel->isLoggedIn();
+
+$bienModel = new Bien();
+$action = $_GET['action'] ?? $_POST['action'] ?? '';
+
+// Actions publiques (sans authentification)
+$publicActions = ['list', 'get'];
+
+// Vérifier l'authentification pour les actions non publiques
+if (!in_array($action, $publicActions) && !$isAuthenticated) {
 	http_response_code(401);
 	echo json_encode(['success' => false, 'message' => 'Non authentifié']);
 	exit;
 }
-
-header('Content-Type: application/json; charset=utf-8');
-
-$bienModel = new Bien();
-$action = $_GET['action'] ?? $_POST['action'] ?? '';
 
 // Détecter si la requête a été tronquée par les limites PHP
 if (empty($action) && $_SERVER['REQUEST_METHOD'] === 'POST' && empty($_POST)) {
@@ -37,7 +42,8 @@ $smoobu = new Smoobu(SMOOBU_API_KEY);
 switch ($action) {
 	// Récupérer tous les biens
 	case 'list':
-		$biens = $bienModel->getAll(null, false);
+		// Si authentifié (admin), retourner tous les biens. Sinon, uniquement les biens actifs
+		$biens = $bienModel->getAll(null, !$isAuthenticated);
 		echo json_encode(['success' => true, 'data' => $biens]);
 		break;
 
@@ -48,7 +54,8 @@ switch ($action) {
 			echo json_encode(['success' => false, 'message' => 'ID manquant']);
 			break;
 		}
-		$bien = $bienModel->getById($id);
+		// Si non authentifié, filtrer uniquement les biens actifs
+		$bien = $bienModel->getById($id, !$isAuthenticated);
 		if ($bien) {
 			echo json_encode(['success' => true, 'data' => $bien]);
 		} else {
