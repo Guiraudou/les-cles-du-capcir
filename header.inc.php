@@ -8,7 +8,7 @@
 	<!-- Bootstrap 5 -->
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
-	<link rel="stylesheet" href="style.css">
+	<link rel="stylesheet" href="style.css?<?= ASSET_TOKEN; ?>">
 
 	<!-- Google Fonts -->
 	<link rel="preconnect" href="https://fonts.googleapis.com">

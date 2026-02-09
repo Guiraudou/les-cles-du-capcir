@@ -77,14 +77,15 @@ function handleContactForm(e) {
 	})
 		.then(response => response.json())
 		.then(data => {
-			if (data.success) {
-				statusDiv.className = 'mt-2 text-success fw-bold';
-				statusDiv.textContent = data.message;
-				form.reset();
-			} else {
+			if (!data.success) {
 				statusDiv.className = 'mt-2 text-danger fw-bold';
 				statusDiv.textContent = data.message || 'Une erreur est survenue.';
+				return;
 			}
+
+			statusDiv.className = 'mt-2 text-success fw-bold';
+			statusDiv.textContent = data.message;
+			form.reset();
 		})
 		.catch(error => {
 			statusDiv.className = 'mt-2 text-danger fw-bold';
@@ -152,31 +153,32 @@ function executeSyncSmoobu() {
 	})
 	.then(response => response.json())
 	.then(data => {
-		if (data.success) {
-			const stats = data.stats;
-			const details = [];
-
-			if (stats.added > 0) details.push(`${stats.added} ajouté(s)`);
-			if (stats.updated > 0) details.push(`${stats.updated} mis à jour`);
-			if (stats.skipped > 0) details.push(`${stats.skipped} ignoré(s)`);
-
-			let message = `Synchronisation terminée !\n\n${details.join(', ')}\n`;
-
-			if (stats.errors && stats.errors.length > 0) {
-				message += `\nErreurs :\n${stats.errors.join('\n')}`;
-			}
-
-			message += `\n\nSauvegarde créée : ${data.backup}`;
-
-			alert(message);
-			showAlert(data.message, 'success');
-			loadBiens();
-		} else {
+		if (!data.success) {
 			showAlert(data.message || 'Erreur lors de la synchronisation', 'danger');
 			if (data.error) {
 				console.error('Erreur de synchronisation:', data.error);
 			}
+			return;
 		}
+
+		const stats = data.stats;
+		const details = [];
+
+		if (stats.added > 0) details.push(`${stats.added} ajouté(s)`);
+		if (stats.updated > 0) details.push(`${stats.updated} mis à jour`);
+		if (stats.skipped > 0) details.push(`${stats.skipped} ignoré(s)`);
+
+		let message = `Synchronisation terminée !\n\n${details.join(', ')}\n`;
+
+		if (stats.errors && stats.errors.length > 0) {
+			message += `\nErreurs :\n${stats.errors.join('\n')}`;
+		}
+
+		message += `\n\nSauvegarde créée : ${data.backup}`;
+
+		alert(message);
+		showAlert(data.message, 'success');
+		loadBiens();
 	})
 	.catch(error => {
 		console.error('Erreur:', error);
@@ -197,13 +199,14 @@ function loadBiens() {
 	fetch('api/biens.php?action=list')
 		.then(response => response.json())
 		.then(data => {
-			if (data.success) {
-				allBiens = data.data;
-				applyFilter();
-				updateStats(data.data);
-			} else {
+			if (!data.success) {
 				showAlert('Erreur lors du chargement des biens', 'danger');
+				return;
 			}
+
+			allBiens = data.data;
+			applyFilter();
+			updateStats(data.data);
 		})
 		.catch(error => {
 			console.error('Erreur:', error);
@@ -247,7 +250,7 @@ function displayBiens(biens) {
 
 	container.innerHTML = biens.map(bien => `
 		<div class="col-md-6 col-lg-4">
-			<div class="card bien-card h-100">
+			<div class="card bien-card h-100 ${bien.actif == 0 ? 'bien-inactif' : ''}">
 				${bien.images && bien.images.length > 0 ? `
 					<img src="${bien.images[0].url}"
 						 class="bien-image"
@@ -315,7 +318,7 @@ function updateStats(biens) {
 /**
  * Charge les données depuis Smoobu et remplit le formulaire
  */
-function loadSmoobuData(form, mode) {
+function loadSmoobuData(form) {
 	const idSmoobuInput = form.querySelector('[name="id_smoobu"]');
 	const idSmoobu = idSmoobuInput.value.trim();
 
@@ -325,7 +328,7 @@ function loadSmoobuData(form, mode) {
 		return;
 	}
 
-	const btn = document.getElementById(`btn-load-smoobu-${mode}`);
+	const btn = form.querySelector('.btn-load-smoobu');
 	const originalHtml = btn.innerHTML;
 	btn.disabled = true;
 	btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Chargement...';
@@ -381,17 +384,26 @@ function initBienForm(form, isAddForm = false) {
 			venteRadio.checked = true;
 			toggleFieldsByStatut(form, 'vente');
 		}
+		// Cacher la section des photos actuelles pour le formulaire d'ajout
+		const currentImages = form.querySelector('.current-images');
+		if (currentImages) {
+			currentImages.classList.add('d-none');
+		}
+		// Cacher le champ statut actif/inactif pour le formulaire d'ajout
+		const fieldActif = form.querySelector('.field-actif');
+		if (fieldActif) {
+			fieldActif.classList.add('d-none');
+		}
 	}
 
 	// Initialiser l'upload d'images
 	initImageUpload(form);
 
 	// Initialiser le bouton de chargement Smoobu
-	const mode = isAddForm ? 'add' : 'edit';
-	const btnLoadSmoobu = document.getElementById(`btn-load-smoobu-${mode}`);
+	const btnLoadSmoobu = form.querySelector('.btn-load-smoobu');
 	if (btnLoadSmoobu) {
 		btnLoadSmoobu.addEventListener('click', function() {
-			loadSmoobuData(form, mode);
+			loadSmoobuData(form);
 		});
 	}
 
@@ -634,17 +646,19 @@ function submitAddForm() {
 	})
 	.then(response => response.json())
 	.then(data => {
-		if (data.success) {
-			showAlert('Bien ajouté avec succès !', 'success');
-			bootstrap.Modal.getInstance(document.getElementById('modalAdd')).hide();
-			form.reset();
-			selectedFilesMap.set(form, []);
-			const previewContainer = form.querySelector('.image-preview-container');
-			if (previewContainer) previewContainer.innerHTML = '';
-			loadBiens();
-		} else {
+		if (!data.success) {
 			showAlert(data.message || 'Erreur lors de l\'ajout', 'danger', form);
+			return;
+
 		}
+
+		showAlert('Bien ajouté avec succès !', 'success');
+		bootstrap.Modal.getInstance(document.getElementById('modalAdd')).hide();
+		form.reset();
+		selectedFilesMap.set(form, []);
+		const previewContainer = form.querySelector('.image-preview-container');
+		if (previewContainer) previewContainer.innerHTML = '';
+		loadBiens();
 	})
 	.catch(error => {
 		console.error('Erreur:', error);
@@ -659,12 +673,13 @@ function editBien(id) {
 	fetch(`api/biens.php?action=get&id=${id}`)
 		.then(response => response.json())
 		.then(data => {
-			if (data.success) {
-				fillEditForm(data.data);
-				new bootstrap.Modal(document.getElementById('modalEdit')).show();
-			} else {
+			if (!data.success) {
 				showAlert('Bien non trouvé', 'danger');
+				return;
 			}
+
+			fillEditForm(data.data);
+			new bootstrap.Modal(document.getElementById('modalEdit')).show();
 		})
 		.catch(error => {
 			console.error('Erreur:', error);
@@ -722,7 +737,7 @@ function fillEditForm(bien) {
  * Affiche les images actuelles dans le formulaire d'édition
  */
 function displayCurrentImages(bienId, images) {
-	const container = document.getElementById('edit-images-current');
+	const container = document.querySelector('.current-images .images-list');
 	if (!container) return;
 
 	if (images.length === 0) {
@@ -745,7 +760,9 @@ function displayCurrentImages(bienId, images) {
  * Supprime une image
  */
 function deleteImage(bienId, filename) {
-	if (!confirm('Supprimer cette image ?')) return;
+	if (!confirm('Supprimer cette image ?')) {
+		return;
+	}
 
 	const formData = new FormData();
 	formData.append('action', 'delete-image');
@@ -758,19 +775,20 @@ function deleteImage(bienId, filename) {
 	})
 	.then(response => response.json())
 	.then(data => {
-		if (data.success) {
-			// Recharger juste les images du bien sans rouvrir le modal
-			fetch(`api/biens.php?action=get&id=${bienId}`)
-				.then(response => response.json())
-				.then(data => {
-					if (data.success) {
-						displayCurrentImages(bienId, data.data.images || []);
-						showAlert('Image supprimée', 'success');
-					}
-				});
-		} else {
+		if (!data.success) {
 			showAlert(data.message || 'Erreur', 'danger');
+			return;
 		}
+
+		// Recharger juste les images du bien sans rouvrir le modal
+		fetch(`api/biens.php?action=get&id=${bienId}`)
+			.then(response => response.json())
+			.then(data => {
+				if (data.success) {
+					displayCurrentImages(bienId, data.data.images || []);
+					showAlert('Image supprimée', 'success');
+				}
+			});
 	})
 	.catch(error => {
 		console.error('Erreur:', error);
@@ -801,16 +819,17 @@ function submitEditForm() {
 	})
 	.then(response => response.json())
 	.then(data => {
-		if (data.success) {
-			showAlert('Bien mis à jour avec succès !', 'success');
-			bootstrap.Modal.getInstance(document.getElementById('modalEdit')).hide();
-			selectedFilesMap.set(form, []);
-			const previewContainer = form.querySelector('.image-preview-container');
-			if (previewContainer) previewContainer.innerHTML = '';
-			loadBiens();
-		} else {
+		if (!data.success) {
 			showAlert(data.message || 'Erreur lors de la mise à jour', 'danger', form);
+			return;
 		}
+
+		showAlert('Bien mis à jour avec succès !', 'success');
+		bootstrap.Modal.getInstance(document.getElementById('modalEdit')).hide();
+		selectedFilesMap.set(form, []);
+		const previewContainer = form.querySelector('.image-preview-container');
+		if (previewContainer) previewContainer.innerHTML = '';
+		loadBiens();
 	})
 	.catch(error => {
 		console.error('Erreur:', error);
@@ -825,11 +844,12 @@ function showDetailModal(id) {
 	fetch(`api/biens.php?action=get&id=${id}`)
 		.then(response => response.json())
 		.then(data => {
-			if (data.success) {
-				displayBienDetail(data.data);
-			} else {
+			if (!data.success) {
 				showAlert('Erreur lors du chargement des détails', 'danger');
+				return;
 			}
+
+			displayBienDetail(data.data);
 		})
 		.catch(error => {
 			console.error('Erreur:', error);
@@ -948,13 +968,14 @@ function deleteBien(id) {
 	})
 	.then(response => response.json())
 	.then(data => {
-		if (data.success) {
-			showAlert('Bien supprimé avec succès', 'success');
-			bootstrap.Modal.getInstance(document.getElementById('modalDelete')).hide();
-			loadBiens();
-		} else {
+		if (!data.success) {
 			showAlert(data.message || 'Erreur lors de la suppression', 'danger');
+			return;
 		}
+
+		showAlert('Bien supprimé avec succès', 'success');
+		bootstrap.Modal.getInstance(document.getElementById('modalDelete')).hide();
+		loadBiens();
 	})
 	.catch(error => {
 		console.error('Erreur:', error);
@@ -1040,15 +1061,16 @@ function handleLoginForm(e) {
 		if (data.success) {
 			// Rediriger vers admin
 			window.location.href = 'admin.php';
-		} else {
-			// Afficher l'erreur
-			alertZone.innerHTML = `
-				<div class="alert alert-danger alert-dismissible fade show">
-					<i class="fa-solid fa-triangle-exclamation"></i> ${data.message}
-					<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-				</div>
-			`;
+			return;
 		}
+
+		// Afficher l'erreur
+		alertZone.innerHTML = `
+			<div class="alert alert-danger alert-dismissible fade show">
+				<i class="fa-solid fa-triangle-exclamation"></i> ${data.message}
+				<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+			</div>
+		`;
 	})
 	.catch(error => {
 		console.error('Erreur:', error);

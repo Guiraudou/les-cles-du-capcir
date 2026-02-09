@@ -17,6 +17,8 @@ require_once __DIR__ . '/../model/Bien.php';
 // Initialiser JsonDB avec le chemin des données
 Osimatic\Data\JsonDB::initialize(__DIR__ . '/../data');
 
+define('ASSET_TOKEN', strtotime('2026-02-09 09:37:00'));
+
 // Configuration email
 define('EMAIL_DESTINATAIRE', 'benoit.guiraudou@gmail.com');
 

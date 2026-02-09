@@ -1,10 +1,3 @@
-<?php
-/**
- * Formulaire de bien réutilisable pour ajout et modification
- * Variable attendue :
- * - $mode : 'add' ou 'edit'
- */
-?>
 <div class="alert-zone"></div>
 
 <div class="mb-3">
@@ -23,7 +16,7 @@
 	<label class="form-label fw-bold">ID Smoobu :</label>
 	<div class="input-group">
 		<input type="text" class="form-control" name="id_smoobu" placeholder="Ex: 123456">
-		<button type="button" class="btn btn-primary" id="btn-load-smoobu-<?= $mode ?>">
+		<button type="button" class="btn btn-primary btn-load-smoobu">
 			<i class="fa-solid fa-download"></i> Charger
 		</button>
 	</div>
@@ -40,8 +33,11 @@
 		<input type="text" class="form-control" name="lieu">
 	</div>
 	<div class="col-md-6">
-		<label class="form-label fw-bold">Surface (m²) :</label>
-		<input type="number" step="0.01" class="form-control" name="surface">
+		<label class="form-label fw-bold">Surface :</label>
+		<div class="input-group">
+			<input type="number" step="0.01" class="form-control" name="surface">
+			<span class="input-group-text">m²</span>
+		</div>
 	</div>
 	<div class="col-12">
 		<label class="form-label fw-bold">Description :</label>
@@ -59,8 +55,11 @@
 		<input type="number" class="form-control" name="nb_personnes">
 	</div>
 	<div class="col-md-6 vente-fields">
-		<label class="form-label fw-bold">Prix (€) :</label>
-		<input type="number" class="form-control" name="prix">
+		<label class="form-label fw-bold">Prix :</label>
+		<div class="input-group">
+			<input type="number" class="form-control" name="prix">
+			<span class="input-group-text">€</span>
+		</div>
 	</div>
 </div>
 
@@ -82,23 +81,21 @@
 	<div class="image-preview-container"></div>
 </div>
 
-<?php if ($mode === 'edit'): ?>
+<div class="mb-3 current-images">
 	<div class="mb-2">Photos actuelles :</div>
-	<div id="edit-images-current" class="mb-3"></div>
-<?php endif; ?>
+	<div class="images-list"></div>
+</div>
 
 <div class="row g-3">
 	<div class="col-md-6">
 		<label class="form-label fw-bold">Ordre d'affichage :</label>
 		<input type="number" class="form-control" name="ordre" value="0">
 	</div>
-	<?php if ($mode === 'edit'): ?>
-		<div class="col-md-6">
-			<label class="form-label fw-bold">Statut :</label>
-			<select class="form-select" name="actif">
-				<option value="1">Actif</option>
-				<option value="0">Inactif</option>
-			</select>
-		</div>
-	<?php endif; ?>
+	<div class="col-md-6 field-actif">
+		<label class="form-label fw-bold">Statut :</label>
+		<select class="form-select" name="actif">
+			<option value="1">Actif</option>
+			<option value="0">Inactif</option>
+		</select>
+	</div>
 </div>

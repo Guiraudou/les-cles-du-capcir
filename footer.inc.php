@@ -101,7 +101,7 @@
 	document.getElementById('year').textContent = new Date().getFullYear();
 </script>
 
-<script src="app.js"></script>
+<script src="app.js?<?= ASSET_TOKEN; ?>"></script>
 
 </body>
 </html>

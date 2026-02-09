@@ -966,7 +966,8 @@ footer .border-top{
 }
 
 /* Bien inactif dans la modal */
-#modalDetailBien .modal-content.bien-inactif {
+/* Styles génériques pour les biens inactifs */
+.bien-inactif {
 	background: repeating-linear-gradient(
 		45deg,
 		#ffffff,
@@ -976,18 +977,14 @@ footer .border-top{
 	);
 }
 
-#modalDetailBien .modal-content.bien-inactif .modal-header,
-#modalDetailBien .modal-content.bien-inactif .modal-body,
-#modalDetailBien .modal-content.bien-inactif .modal-footer {
+.bien-inactif .modal-header,
+.bien-inactif .modal-body,
+.bien-inactif .modal-footer,
+.bien-inactif .card-body {
 	background: transparent;
 }
 
-#modalDetailBien .modal-content.bien-inactif .carousel-item img {
-	filter: grayscale(50%);
-	opacity: 0.7;
-}
-
-#modalDetailBien .modal-content.bien-inactif .thumbnail img {
+.bien-inactif img {
 	filter: grayscale(50%);
 	opacity: 0.7;
 }

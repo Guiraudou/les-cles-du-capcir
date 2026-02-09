@@ -85,10 +85,7 @@
 			</div>
 			<form id="formAdd" enctype="multipart/form-data">
 				<div class="modal-body">
-					<?php
-					$mode = 'add';
-					include 'form_bien.inc.php';
-					?>
+					<?php include 'form_bien.inc.php'; ?>
 				</div>
 				<div class="modal-footer">
 					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
@@ -112,10 +109,7 @@
 			<form id="formEdit" enctype="multipart/form-data">
 				<input type="hidden" name="id" id="edit-id">
 				<div class="modal-body">
-					<?php
-					$mode = 'edit';
-					include 'form_bien.inc.php';
-					?>
+					<?php include 'form_bien.inc.php'; ?>
 				</div>
 				<div class="modal-footer">
 					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
