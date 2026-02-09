@@ -60,7 +60,11 @@ function displayIndexBiens(containerId, biens, type) {
 		return;
 	}
 
-	container.innerHTML = biens.map(bien => createBienCard(bien, 'public', 'listing')).join('');
+	container.innerHTML = biens.map(bien => `
+		<div class="col-12">
+			${createBienCard(bien, 'public')}
+		</div>
+	`).join('');
 }
 
 // ---------- Image hero ----------
@@ -253,103 +257,73 @@ function executeSyncSmoobu() {
  * Génère le HTML d'une carte de bien
  * @param {object} bien - Les données du bien
  * @param {string} context - 'admin' ou 'public'
- * @param {string} layout - 'card' ou 'listing'
  */
-function createBienCard(bien, context = 'public', layout = 'listing') {
-	if (layout === 'card') {
-		// Layout carte (admin)
-		return `
-			<div class="col-md-6 col-lg-4">
-				<div class="card bien-card h-100 ${bien.actif == 0 ? 'bien-inactif' : ''}">
-					${bien.images && bien.images.length > 0 ? `
-						<img src="${bien.images[0].url}"
-							 class="bien-image"
-							 alt="${escapeHtml(bien.titre)}">
-					` : `
-						<div class="bien-image bg-secondary d-flex align-items-center justify-content-center text-white">
-							<i class="fa-solid fa-image fa-3x opacity-50"></i>
-						</div>
-					`}
-					<div class="card-body d-flex flex-column">
-						<div class="mb-2">
-							<span class="badge ${bien.statut === 'vente' ? 'badge-vente' : 'badge-location'}">
-								${bien.statut.charAt(0).toUpperCase() + bien.statut.slice(1)}
-							</span>
-							${bien.actif == 0 ? '<span class="badge bg-secondary">Inactif</span>' : ''}
-						</div>
-						${bien.prix ? `<div class="prix text-nowrap" style="float: right">${formatPrice(bien.prix)}</div>` : ''}
-						<h5 class="card-title">${escapeHtml(bien.titre)}</h5>
-						<div class="small text-muted mb-2">
-							${bien.lieu ? `<i class="fa-solid fa-location-dot"></i> ${escapeHtml(bien.lieu)}<br>` : ''}
-							${bien.surface ? `<i class="fa-solid fa-ruler-combined"></i> ${bien.surface} m²` : ''}
-							${bien.nb_chambres ? ` • ${bien.nb_chambres} ch.` : ''}
-							${bien.statut === 'location' && bien.nb_personnes ? ` • ${bien.nb_personnes} pers.` : ''}
-						</div>
-						<div class="text-end mt-auto">
-							<button class="btn btn-sm btn-info ms-2" onclick="showDetailModal(${bien.id})">
-								<i class="fa-solid fa-eye"></i>
-							</button>
-							<button class="btn btn-sm btn-warning ms-2" onclick="editBien(${bien.id})">
-								<i class="fa-solid fa-pen"></i>
-							</button>
-							<button class="btn btn-sm btn-danger ms-2" onclick="showDeleteModal(${bien.id}, '${escapeHtml(bien.titre)}')">
-								<i class="fa-solid fa-trash"></i>
-							</button>
-						</div>
-					</div>
-				</div>
-			</div>
+function createBienCard(bien, context = 'public') {
+	// Boutons selon le contexte
+	let buttonsHtml;
+	if (context === 'admin') {
+		buttonsHtml = `
+			<button class="btn btn-sm btn-info ms-2" onclick="showDetailModal(${bien.id})">
+				<i class="fa-solid fa-eye"></i>
+			</button>
+			<button class="btn btn-sm btn-warning ms-2" onclick="editBien(${bien.id})">
+				<i class="fa-solid fa-pen"></i>
+			</button>
+			<button class="btn btn-sm btn-danger ms-2" onclick="showDeleteModal(${bien.id}, '${escapeHtml(bien.titre)}')">
+				<i class="fa-solid fa-trash"></i>
+			</button>
 		`;
 	} else {
-		// Layout listing (public)
-		const buttonHtml = bien.statut === 'location'
+		const actionButton = bien.statut === 'location'
 			? `<button type="button" class="btn btn-sapin btn-sm" onclick="openBookingModal(${bien.id_smoobu || 0}, '${escapeHtml(bien.titre)}')">Réserver</button>`
 			: `<a class="btn btn-sapin btn-sm" href="#contact">Infos / visite</a>`;
 
-		return `
-			<div class="col-12">
-				<div class="listing">
-					<div class="listing-image-container">
-						${bien.images && bien.images.length > 0 ? `
-							<img src="${bien.images[0].url}" alt="${escapeHtml(bien.titre)}">
-						` : `
-							<div class="listing-image-placeholder bg-secondary d-flex align-items-center justify-content-center text-white">
-								<i class="fa-solid fa-image fa-3x opacity-50"></i>
-							</div>
-						`}
-						<div class="listing-image-overlay">
-							<h5 class="listing-image-title">${escapeHtml(bien.titre)}</h5>
-						</div>
-					</div>
-					<div class="body">
-						<div class="mb-2 fw-bold small">
-							${bien.surface ? `${bien.surface} m²` : ''}
-							${bien.nb_chambres ? `${bien.surface ? ' • ' : ''}${bien.nb_chambres} ch.` : ''}
-							${bien.statut === 'location' && bien.nb_personnes ? ` • ${bien.nb_personnes} pers.` : ''}
-							${!bien.surface && !bien.nb_chambres ? '&nbsp;' : ''}
-						</div>
-						<div class="text-muted small mb-3">
-							${bien.lieu ? `<i class="fa-solid fa-location-dot"></i> ${escapeHtml(bien.lieu)}` : ''}
-						</div>
-						${bien.prix ? `
-							<div class="prix prix-right text-nowrap">
-								${formatPrice(bien.prix)}
-							</div>
-						` : ''}
-						${bien.description ? `
-							<p class="small text-muted mb-3">
-								${escapeHtml(bien.description.substring(0, 80))}${bien.description.length > 80 ? '...' : ''}
-							</p>
-						` : ''}
-						<div class="d-flex gap-2">
-							<button type="button" class="btn btn-outline-sapin btn-sm" onclick="showDetailModal(${bien.id})">Détails</button>
-							${buttonHtml}
-						</div>
-					</div>
-				</div>
-			</div>
+		buttonsHtml = `
+			<button type="button" class="btn btn-outline-sapin btn-sm" onclick="showDetailModal(${bien.id})">Détails</button>
+			${actionButton}
 		`;
 	}
+
+	return `
+		<div class="listing ${bien.actif == 0 ? 'bien-inactif' : ''}">
+			<div class="listing-image-container">
+				${bien.images && bien.images.length > 0 ? `
+					<img src="${bien.images[0].url}" alt="${escapeHtml(bien.titre)}">
+				` : `
+					<div class="listing-image-placeholder bg-secondary d-flex align-items-center justify-content-center text-white">
+						<i class="fa-solid fa-image fa-3x opacity-50"></i>
+					</div>
+				`}
+				<div class="listing-image-overlay">
+					<h5 class="listing-image-title">${escapeHtml(bien.titre)}</h5>
+				</div>
+			</div>
+			<div class="body">
+				<div class="mb-2 fw-bold small">
+					${bien.surface ? `${bien.surface} m²` : ''}
+					${bien.nb_chambres ? `${bien.surface ? ' • ' : ''}${bien.nb_chambres} ch.` : ''}
+					${bien.statut === 'location' && bien.nb_personnes ? ` • ${bien.nb_personnes} pers.` : ''}
+					${!bien.surface && !bien.nb_chambres ? '&nbsp;' : ''}
+				</div>
+				<div class="text-muted small mb-3">
+					${bien.lieu ? `<i class="fa-solid fa-location-dot"></i> ${escapeHtml(bien.lieu)}` : ''}
+				</div>
+				${bien.prix ? `
+					<div class="prix prix-right text-nowrap">
+						${formatPrice(bien.prix)}
+					</div>
+				` : ''}
+				${bien.description ? `
+					<p class="small text-muted mb-3">
+						${escapeHtml(bien.description.substring(0, 80))}${bien.description.length > 80 ? '...' : ''}
+					</p>
+				` : ''}
+				<div class="d-flex gap-2 ${context === 'admin' ? 'justify-content-end' : ''}">
+					${buttonsHtml}
+				</div>
+			</div>
+		</div>
+	`;
 }
 
 /**
@@ -408,7 +382,11 @@ function displayBiens(biens) {
 		return;
 	}
 
-	container.innerHTML = biens.map(bien => createBienCard(bien, 'admin', 'card')).join('');
+	container.innerHTML = biens.map(bien => `
+		<div class="col-md-6 col-lg-4">
+			${createBienCard(bien, 'admin')}
+		</div>
+	`).join('');
 }
 
 /**
