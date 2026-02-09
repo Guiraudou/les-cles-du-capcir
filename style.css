@@ -397,17 +397,6 @@ section{
 	position: relative;
 }
 
-.listing .body .prix {
-	color: var(--color-sapin);
-	font-weight: bold;
-	font-size: 1.25rem;
-}
-.listing .body .prix.prix-right {
-	position: absolute;
-	right: 22px;
-	top: 22px;
-}
-
 .listing .body .d-flex.gap-2 {
 	margin-top: auto;
 }
@@ -415,6 +404,17 @@ section{
 .listing .btn-sm{
 	padding: .5rem 1rem;
 	font-size: 0.95rem;
+}
+
+.prix {
+	color: var(--color-sapin);
+	font-weight: bold;
+	font-size: 1.25rem;
+}
+.prix.prix-right {
+	position: absolute;
+	right: 22px;
+	top: 22px;
 }
 
 /* Colonnes Ventes & Locations */

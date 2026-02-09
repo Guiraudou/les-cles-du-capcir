@@ -1,15 +1,4 @@
-<?php
-require_once 'model/config.php';
-
-// Charger les biens depuis la base de données
-$bienModel = new Bien();
-$allBiens = $bienModel->getAll();
-
-// Filtrer et limiter les biens actifs
-$ventes = array_slice(array_filter($allBiens, fn ($b) => $b['statut'] === 'vente' && $b['actif']), 0, 3);
-$locations = array_slice(array_filter($allBiens, fn ($b) => $b['statut'] === 'location' && $b['actif']), 0, 3);
-
-?>
+<?php require_once 'model/config.php'; ?>
 <?php require_once 'header.inc.php'; ?>
 
 <!-- HERO (with integrated menu) -->
@@ -154,65 +143,8 @@ $locations = array_slice(array_filter($allBiens, fn ($b) => $b['statut'] === 'lo
 						<a href="vente.php" class="text-decoration-none link-voir-tout">Tout voir →</a>
 					</div>
 
-					<div class="row g-3">
-						<?php if (empty($ventes)): ?>
-							<div class="col-12">
-								<div class="alert alert-info mb-0">
-									Aucun bien en vente pour le moment.
-								</div>
-							</div>
-						<?php else: ?>
-							<?php foreach ($ventes as $bien): ?>
-								<div class="col-12">
-									<div class="listing">
-										<div class="listing-image-container">
-											<?php if (!empty($bien['images'])): ?>
-												<img src="<?= htmlspecialchars($bien['images'][0]['url']) ?>" alt="<?= htmlspecialchars($bien['titre']) ?>">
-											<?php else: ?>
-												<div class="listing-image-placeholder bg-secondary d-flex align-items-center justify-content-center text-white">
-													<i class="fa-solid fa-image fa-3x opacity-50"></i>
-												</div>
-											<?php endif; ?>
-											<div class="listing-image-overlay">
-												<h5 class="listing-image-title"><?= htmlspecialchars($bien['titre']) ?></h5>
-											</div>
-										</div>
-										<div class="body">
-											<div class="mb-2 fw-bold small">
-												<?php if (!empty($bien['surface'])): ?>
-													<?= htmlspecialchars($bien['surface']) ?> m²
-												<?php endif; ?>
-												<?php if (!empty($bien['nb_chambres'])): ?>
-													<?= !empty($bien['surface']) ? ' • ' : '' ?><?= htmlspecialchars($bien['nb_chambres']) ?> ch.
-												<?php endif; ?>
-												<?php if (empty($bien['surface']) && empty($bien['nb_chambres'])): ?>
-													&nbsp;
-												<?php endif; ?>
-											</div>
-											<div class="text-muted small mb-3">
-												<?php if (!empty($bien['lieu'])): ?>
-													<i class="fa-solid fa-location-dot"></i> <?= htmlspecialchars($bien['lieu']) ?>
-												<?php endif; ?>
-											</div>
-											<?php if (!empty($bien['prix'])): ?>
-												<div class="prix prix-right text-nowrap">
-													<?= number_format($bien['prix'], 0, ',', ' ') ?> €
-												</div>
-											<?php endif; ?>
-											<?php if (!empty($bien['description'])): ?>
-												<p class="small text-muted mb-3">
-													<?= htmlspecialchars(mb_substr($bien['description'], 0, 80)) ?><?= mb_strlen($bien['description']) > 80 ? '...' : '' ?>
-												</p>
-											<?php endif; ?>
-											<div class="d-flex gap-2">
-												<button type="button" class="btn btn-outline-sapin btn-sm" onclick="showDetailModal(<?= $bien['id'] ?>)">Détails</button>
-												<a class="btn btn-sapin btn-sm" href="#contact">Infos / visite</a>
-											</div>
-										</div>
-									</div>
-								</div>
-							<?php endforeach; ?>
-						<?php endif; ?>
+					<div id="ventes-list" class="row g-3">
+						<!-- Les biens en vente seront chargés ici en JavaScript -->
 					</div>
 				</div>
 			</div>
@@ -225,58 +157,8 @@ $locations = array_slice(array_filter($allBiens, fn ($b) => $b['statut'] === 'lo
 						<a href="location.php" class="text-decoration-none link-voir-tout">Tout voir →</a>
 					</div>
 
-					<div class="row g-3">
-						<?php if (empty($locations)): ?>
-							<div class="col-12">
-								<div class="alert alert-info mb-0">
-									Aucun bien en location pour le moment.
-								</div>
-							</div>
-						<?php else: ?>
-							<?php foreach ($locations as $bien): ?>
-								<div class="col-12">
-									<div class="listing">
-										<div class="listing-image-container">
-											<?php if (!empty($bien['images'])): ?>
-												<img src="<?= htmlspecialchars($bien['images'][0]['url']) ?>" alt="<?= htmlspecialchars($bien['titre']) ?>">
-											<?php else: ?>
-												<div class="listing-image-placeholder bg-secondary d-flex align-items-center justify-content-center text-white">
-													<i class="fa-solid fa-image fa-3x opacity-50"></i>
-												</div>
-											<?php endif; ?>
-											<div class="listing-image-overlay">
-												<h5 class="listing-image-title"><?= htmlspecialchars($bien['titre']) ?></h5>
-											</div>
-										</div>
-										<div class="body">
-											<div class="mb-2 fw-bold small">
-												<?php if (!empty($bien['nb_chambres'])): ?>
-													<?= htmlspecialchars($bien['nb_chambres']) ?> ch.
-												<?php endif; ?>
-												<?php if (!empty($bien['nb_personnes'])): ?>
-													<?= !empty($bien['nb_chambres']) ? ' • ' : '' ?><?= htmlspecialchars($bien['nb_personnes']) ?> pers.
-												<?php endif; ?>
-											</div>
-											<div class="text-muted small mb-3">
-												<?php if (!empty($bien['lieu'])): ?>
-													<i class="fa-solid fa-location-dot"></i> <?= htmlspecialchars($bien['lieu']) ?>
-												<?php endif; ?>
-											</div>
-
-											<?php if (!empty($bien['description'])): ?>
-												<p class="small text-muted mb-3">
-													<?= htmlspecialchars(mb_substr($bien['description'], 0, 80)) ?><?= mb_strlen($bien['description']) > 80 ? '...' : '' ?>
-												</p>
-											<?php endif; ?>
-											<div class="d-flex gap-2">
-												<button type="button" class="btn btn-outline-sapin btn-sm" onclick="showDetailModal(<?= $bien['id'] ?>)">Détails</button>
-												<button type="button" class="btn btn-sapin btn-sm" onclick="openBookingModal(<?= !empty($bien['id_smoobu']) ? htmlspecialchars($bien['id_smoobu']) : 0 ?>, '<?= !empty($bien['id_smoobu']) ? htmlspecialchars($bien['titre']) : '' ?>')">Réserver</button>
-											</div>
-										</div>
-									</div>
-								</div>
-							<?php endforeach; ?>
-						<?php endif; ?>
+					<div id="locations-list" class="row g-3">
+						<!-- Les biens en location seront chargés ici en JavaScript -->
 					</div>
 				</div>
 			</div>
