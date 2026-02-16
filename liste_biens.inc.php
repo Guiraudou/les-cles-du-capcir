@@ -72,8 +72,8 @@ $pageDescription = $type === 'vente'
 									<?php endif; ?>
 								</div>
 								<div class="text-muted small mb-3">
-									<?php if (!empty($bien['lieu'])): ?>
-										<i class="fa-solid fa-location-dot"></i> <?= htmlspecialchars($bien['lieu']) ?>
+									<?php if (!empty($bien['city'])): ?>
+										<i class="fa-solid fa-location-dot"></i> <?= htmlspecialchars($bien['city']) ?>
 									<?php endif; ?>
 								</div>
 								<?php if (!empty($bien['prix'])): ?>

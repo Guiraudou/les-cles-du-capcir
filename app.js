@@ -223,22 +223,17 @@ function executeSyncSmoobu() {
 		}
 
 		const stats = data.stats;
-		const details = [];
 
-		if (stats.added > 0) details.push(`${stats.added} ajouté(s)`);
-		if (stats.updated > 0) details.push(`${stats.updated} mis à jour`);
-		if (stats.skipped > 0) details.push(`${stats.skipped} ignoré(s)`);
-
-		let message = `Synchronisation terminée !\n\n${details.join(', ')}\n`;
-
+		let message =
+			'Synchronisation terminée : '
+			+ stats['added']+' ajouté'+(stats['added']>1?'s':'')+' ; '
+			+ stats['updated']+' mis à jour ; '
+			+ stats['skipped']+' ignoré'+(stats['skipped']>1?'s':'')+'.<br>'
+		;
 		if (stats.errors && stats.errors.length > 0) {
-			message += `\nErreurs :\n${stats.errors.join('\n')}`;
+			message += '<ul class="mb-0 mt-2">' + stats.errors.map(err => `<li>${err}</li>`).join('') + '</ul>';
 		}
-
-		message += `\n\nSauvegarde créée : ${data.backup}`;
-
-		alert(message);
-		showAlert(data.message, 'success');
+		showAlert(message, 'success');
 		loadBiens();
 	})
 	.catch(error => {
@@ -300,13 +295,14 @@ function createBienCard(bien, context = 'public') {
 			</div>
 			<div class="body">
 				<div class="mb-2 fw-bold small">
-					${bien.surface ? `${bien.surface} m²` : ''}
-					${bien.nb_chambres ? `${bien.surface ? ' • ' : ''}${bien.nb_chambres} ch.` : ''}
-					${bien.statut === 'location' && bien.nb_personnes ? ` • ${bien.nb_personnes} pers.` : ''}
-					${!bien.surface && !bien.nb_chambres ? '&nbsp;' : ''}
+					${[
+						bien.surface ? `${bien.surface} m²` : null,
+						bien.nb_chambres ? `${bien.nb_chambres} ch.` : null,
+						bien.statut === 'location' && bien.nb_personnes ? `${bien.nb_personnes} pers.` : null
+					].filter(Boolean).join(' • ') || '&nbsp;'}
 				</div>
 				<div class="text-muted small mb-3">
-					${bien.lieu ? `<i class="fa-solid fa-location-dot"></i> ${escapeHtml(bien.lieu)}` : ''}
+					${bien.city ? `<i class="fa-solid fa-location-dot"></i> ${escapeHtml(bien.city)}` : ''}
 				</div>
 				${bien.prix ? `
 					<div class="prix prix-right text-nowrap">
@@ -433,15 +429,15 @@ function loadSmoobuData(form) {
 			}
 
 			// Remplir les champs du formulaire
-			const bienData = data.data;
+			const apt = data.data;
 
-			if (bienData.titre) form.querySelector('[name="titre"]').value = bienData.titre;
-			if (bienData.description) form.querySelector('[name="description"]').value = bienData.description;
-			if (bienData.lieu) form.querySelector('[name="lieu"]').value = bienData.lieu;
-			if (bienData.surface) form.querySelector('[name="surface"]').value = bienData.surface;
-			if (bienData.nb_chambres) form.querySelector('[name="nb_chambres"]').value = bienData.nb_chambres;
-			if (bienData.nb_personnes) form.querySelector('[name="nb_personnes"]').value = bienData.nb_personnes;
-			if (bienData.prix) form.querySelector('[name="prix"]').value = bienData.prix;
+			if (apt.name) form.querySelector('[name="titre"]').value = apt.name;
+			if (apt.description) form.querySelector('[name="description"]').value = apt.description;
+			if (apt.location?.city) form.querySelector('[name="city"]').value = apt.location.city;
+			if (apt.size) form.querySelector('[name="surface"]').value = apt.size;
+			if (apt.rooms?.bedrooms) form.querySelector('[name="nb_chambres"]').value = apt.rooms.bedrooms;
+			if (apt.rooms?.maxOccupancy) form.querySelector('[name="nb_personnes"]').value = apt.rooms.maxOccupancy;
+			if (apt.price?.minimal) form.querySelector('[name="prix"]').value = apt.price.minimal;
 
 			showAlert('Données Smoobu chargées avec succès !', 'success', form);
 		})
@@ -793,7 +789,7 @@ function fillEditForm(bien) {
 	});
 
 	form.querySelector('[name="titre"]').value = bien.titre;
-	form.querySelector('[name="lieu"]').value = bien.lieu || '';
+	form.querySelector('[name="city"]').value = bien.city || '';
 	form.querySelector('[name="surface"]').value = bien.surface || '';
 	form.querySelector('[name="description"]').value = bien.description || '';
 	form.querySelector('[name="prix"]').value = bien.prix || '';
@@ -1004,7 +1000,7 @@ function displayBienDetail(bien) {
 	}
 
 	// Informations
-	document.getElementById('modalDetailLieu').textContent = bien.lieu || 'Non renseigné';
+	document.getElementById('modalDetailLieu').textContent = bien.city || 'Non renseigné';
 	document.getElementById('modalDetailSurface').textContent = bien.surface ? `${bien.surface} m²` : 'Non renseigné';
 	document.getElementById('modalDetailChambres').textContent = bien.nb_chambres || 'Non renseigné';
 

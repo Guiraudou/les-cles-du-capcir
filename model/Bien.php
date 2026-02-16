@@ -82,6 +82,7 @@ class Bien
 			'titre' => $data['titre'],
 			'description' => $data['description'] ?? '',
 			'lieu' => $data['lieu'] ?? '',
+			'city' => $data['city'] ?? null,
 			'surface' => isset($data['surface']) ? floatval($data['surface']) : null,
 			'nb_chambres' => isset($data['nb_chambres']) ? intval($data['nb_chambres']) : null,
 			'nb_personnes' => isset($data['nb_personnes']) ? intval($data['nb_personnes']) : null,
@@ -116,6 +117,7 @@ class Bien
 				$bien['titre'] = $data['titre'];
 				$bien['description'] = $data['description'] ?? '';
 				$bien['lieu'] = $data['lieu'] ?? '';
+				$bien['city'] = $data['city'] ?? null;
 				$bien['surface'] = isset($data['surface']) ? floatval($data['surface']) : null;
 				$bien['nb_chambres'] = isset($data['nb_chambres']) ? intval($data['nb_chambres']) : null;
 				$bien['nb_personnes'] = isset($data['nb_personnes']) ? intval($data['nb_personnes']) : null;
@@ -365,6 +367,7 @@ class Bien
 			'titre' => htmlspecialchars($bien['titre']),
 			'description' => htmlspecialchars($bien['description'] ?? ''),
 			'lieu' => htmlspecialchars($bien['lieu'] ?? ''),
+			'city' => htmlspecialchars($bien['city'] ?? ''),
 			'surface' => $bien['surface'] ?? null,
 			'nb_chambres' => $bien['nb_chambres'] ?? null,
 			'nb_personnes' => $bien['nb_personnes'] ?? null,

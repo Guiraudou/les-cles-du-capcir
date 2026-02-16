@@ -30,7 +30,7 @@
 	</div>
 	<div class="col-md-6">
 		<label class="form-label fw-bold">Lieu :</label>
-		<input type="text" class="form-control" name="lieu">
+		<input type="text" class="form-control" name="city">
 	</div>
 	<div class="col-md-6">
 		<label class="form-label fw-bold">Surface :</label>
