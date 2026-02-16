@@ -63,7 +63,7 @@ try {
 			$apartments = $apartments['apartments'] ?? [];
 
 			// Filtrer uniquement les appartements (pas les groupes)
-			$apartments = array_filter($apartments, fn($apt) => isset($apartmentDetails['id']) && !empty($apartmentDetails['name']));
+			$apartments = array_filter($apartments, fn($apartmentDetails) => isset($apartmentDetails['id']) && !empty($apartmentDetails['name']));
 
 			// 3. Récupérer tous les biens existants
 			$existingBiens = $bienModel->getAll(null, false);
