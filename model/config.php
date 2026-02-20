@@ -32,8 +32,9 @@ define('UPLOADS_DIR', __DIR__ . '/../data/uploads/biens/'); // Chemin absolu pou
 define('MAX_IMAGES_UPLOAD', 10); // Nombre maximum d'images par bien
 
 // Configuration Smoobu
-define('SMOOBU_API_KEY', 'jIeJeAaMTkXdGukdSCMXXybp2c9LtauhDYTpdzatDj'); // À renseigner avec votre clé API Smoobu
-define('SMOOBU_ACCOUNT_ID', '1436716');
+$secrets = parse_ini_file(__DIR__ . '/secrets.ini', true);
+define('SMOOBU_API_KEY', $secrets['smoobu']['api_key']);
+define('SMOOBU_ACCOUNT_ID', $secrets['smoobu']['account_id']);
 
 // Autres paramètres
 define('TIMEZONE', 'Europe/Paris');
