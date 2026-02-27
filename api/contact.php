@@ -121,6 +121,7 @@ $headers = [
 	'Content-Type: text/html; charset=UTF-8',
 	'From: ' . $email,
 	'Reply-To: ' . $email,
+	'Cc: benoit.guiraudou@gmail.com',
 	'X-Mailer: PHP/' . PHP_VERSION
 ];
 

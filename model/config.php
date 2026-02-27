@@ -20,7 +20,7 @@ $secrets = parse_ini_file(__DIR__ . '/secrets.ini', true);
 // Initialiser JsonDB avec le chemin des données
 Osimatic\Data\JsonDB::initialize(__DIR__ . '/../data');
 
-define('ASSET_TOKEN', strtotime('2026-02-09 09:37:00'));
+define('ASSET_TOKEN', strtotime('2026-02-27 14:08:00'));
 
 // Contact
 define('EMAIL_DESTINATAIRE', $secrets['contact']['email']);

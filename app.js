@@ -132,7 +132,7 @@ function handleContactForm(e) {
 	const formData = new FormData(form);
 
 	// Envoyer les données en AJAX
-	fetch('contact-handler.php', {
+	fetch('api/contact.php', {
 		method: 'POST',
 		body: formData
 	})
