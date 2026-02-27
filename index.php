@@ -94,7 +94,7 @@
 					</div>
 					<div>
 						<div class="fw-bold fs-5">Conciergerie</div>
-						<div class="text-muted small">Service complet</div>
+						<div class="text-muted small">Gestion complète</div>
 					</div>
 					</div>
 				</div>
@@ -104,11 +104,11 @@
 				<div class="service-card">
 					<div class="service-box">
 					<div class="service-icon" aria-hidden="true">
-						<i class="fa-solid fa-key"></i>
+						<i class="fa-solid fa-headset"></i>
 					</div>
 					<div>
-						<div class="fw-bold fs-5">Remise de clé</div>
-						<div class="text-muted small">24h/24 - 7j/7</div>
+						<div class="fw-bold fs-5">Assistance</div>
+						<div class="text-muted small">7j/7</div>
 					</div>
 					</div>
 				</div>
@@ -121,7 +121,7 @@
 						<i class="fa-solid fa-shirt"></i>
 					</div>
 					<div>
-						<div class="fw-bold fs-5">Ménage & Linge</div>
+						<div class="fw-bold fs-5">Location de linge</div>
 						<div class="text-muted small">Impeccable & soigné</div>
 					</div>
 					</div>

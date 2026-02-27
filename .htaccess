@@ -1,9 +1,14 @@
+
 # Désactiver le listing des répertoires
 Options -Indexes
 
-# Bloquer l'accès aux dossiers sensibles
 <IfModule mod_rewrite.c>
     RewriteEngine On
+
+    # Redirection .com vers .fr
+    RewriteCond %{HTTP_HOST} ^(www\.)?lesclesducapcir\.com$ [NC]
+    RewriteRule ^(.*)$ https://lesclesducapcir.fr/$1 [L,R=301]
+
     # Bloquer model/ entièrement
     RewriteRule ^model/ - [F,L]
     # Bloquer data/ sauf data/uploads/ (images publiques)
