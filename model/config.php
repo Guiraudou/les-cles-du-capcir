@@ -14,13 +14,17 @@ require_once dirname(__DIR__).'/vendor/autoload.php';
 require_once __DIR__ . '/../model/User.php';
 require_once __DIR__ . '/../model/Bien.php';
 
+// Init secrets
+$secrets = parse_ini_file(__DIR__ . '/secrets.ini', true);
+
 // Initialiser JsonDB avec le chemin des données
 Osimatic\Data\JsonDB::initialize(__DIR__ . '/../data');
 
 define('ASSET_TOKEN', strtotime('2026-02-09 09:37:00'));
 
-// Configuration email
-define('EMAIL_DESTINATAIRE', 'benoit.guiraudou@gmail.com');
+// Contact
+define('EMAIL_DESTINATAIRE', $secrets['contact']['email']);
+define('PHONE', $secrets['contact']['phone']);
 
 // Informations du site
 define('SITE_NAME', 'Les clés du Capcir');
@@ -32,7 +36,6 @@ define('UPLOADS_DIR', __DIR__ . '/../data/uploads/biens/'); // Chemin absolu pou
 define('MAX_IMAGES_UPLOAD', 10); // Nombre maximum d'images par bien
 
 // Configuration Smoobu
-$secrets = parse_ini_file(__DIR__ . '/secrets.ini', true);
 define('SMOOBU_API_KEY', $secrets['smoobu']['api_key']);
 define('SMOOBU_ACCOUNT_ID', $secrets['smoobu']['account_id']);
 

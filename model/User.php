@@ -185,6 +185,7 @@ class User
 	 */
 	public function startSession(array $user): void
 	{
+		session_regenerate_id(true);
 		$_SESSION['admin_id'] = $user['id'];
 		$_SESSION['admin_username'] = $user['username'];
 		$_SESSION['admin_email'] = $user['email'] ?? '';

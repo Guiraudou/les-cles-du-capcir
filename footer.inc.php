@@ -6,11 +6,11 @@
 			<div class="col-6 col-md-4 text-center order-2">
 				<div class="footer-contact-item">
 					<i class="fa-solid fa-envelope"></i><br>
-					<span class="small">contact@exemple.fr</span>
+					<a href="mailto:<?= EMAIL_DESTINATAIRE ?>" class="small text-decoration-none"><?= EMAIL_DESTINATAIRE ?></a>
 				</div>
 				<div class="footer-contact-item">
 					<i class="fa-solid fa-phone"></i><br>
-					<span class="small">+33 6 00 00 00 00</span>
+					<a href="tel:<?= PHONE ?>" class="small text-decoration-none"><?= \Osimatic\Messaging\PhoneNumber::formatInternational(PHONE) ?></a>
 				</div>
 			</div>
 

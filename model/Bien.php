@@ -6,6 +6,7 @@
  */
 
 use Osimatic\Data\JsonDB;
+use Osimatic\Media\Image;
 
 class Bien
 {
@@ -247,18 +248,15 @@ class Bien
 				continue;
 			}
 
-			// Vérifier le type MIME
-			$finfo = finfo_open(FILEINFO_MIME_TYPE);
-			$mimeType = finfo_file($finfo, $tmpName);
-			finfo_close($finfo);
-
-			$allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
-			if (!in_array($mimeType, $allowedTypes)) {
+			// Vérifier que le fichier est une image valide (extension + MIME)
+			if (!Image::checkFile($tmpName, $originalName)) {
 				continue;
 			}
 
-			// Générer un nom unique
-			$extension = pathinfo($originalName, PATHINFO_EXTENSION);
+			// Générer un nom unique avec une extension basée sur le MIME vérifié (pas le nom original)
+			if (null === ($extension = Image::getExtensionFromMimeType(Image::getMimeType($tmpName)))) {
+				continue;
+			}
 			$filename = uniqid('bien_' . $bienId . '_') . '.' . $extension;
 			$uploadPath = $uploadDir . $filename;
 

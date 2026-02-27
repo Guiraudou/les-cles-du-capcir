@@ -1,0 +1,22 @@
+# Désactiver le listing des répertoires
+Options -Indexes
+
+# Bloquer l'accès aux dossiers sensibles
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    # Bloquer model/ entièrement
+    RewriteRule ^model/ - [F,L]
+    # Bloquer data/ sauf data/uploads/ (images publiques)
+    RewriteRule ^data/(?!uploads/) - [F,L]
+</IfModule>
+
+# Bloquer les fichiers sensibles
+<FilesMatch "\.(ini|json|lock)$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>
