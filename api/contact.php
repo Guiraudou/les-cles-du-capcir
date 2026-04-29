@@ -25,11 +25,14 @@ if (empty($nom)) {
 	$errors[] = 'Le nom est requis';
 }
 
-if (empty($email)) {
-	$errors[] = 'L\'email est requis';
+if (empty($email) && empty($telephone)) {
+	$errors[] = 'Un email ou un téléphone est requis';
 }
-elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+if (!empty($email) && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
 	$errors[] = 'L\'email n\'est pas valide';
+}
+if (!empty($telephone) && !\Osimatic\Messaging\PhoneNumber::isValid($telephone)) {
+	$errors[] = 'Le numéro de téléphone n\'est pas valide';
 }
 
 if (empty($sujet)) {

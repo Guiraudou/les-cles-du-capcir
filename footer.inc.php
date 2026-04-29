@@ -40,12 +40,13 @@
 					</div>
 				</div>
 				<div class="col-12 col-md-6 text-end">
-					<div class="d-flex gap-3 justify-content-end flex-wrap small">
-						<div class="text-muted">© <span id="year"></span> Tous droits réservés</div>
+					<div class="d-flex gap-3 justify-content-end flex-wrap small mb-1">
+						<a href="cgv.php" class="link-underlined text-muted">CGV</a>
 						<a href="mentions-legales.php" class="link-underlined text-muted">Mentions légales</a>
 						<a href="confidentialite.php" class="link-underlined text-muted">Confidentialité</a>
 						<a href="#" class="link-underlined text-muted" data-bs-toggle="modal" data-bs-target="#modalLogin">Administration</a>
 					</div>
+					<div class="text-muted small">© <span id="year"></span> Tous droits réservés</div>
 				</div>
 			</div>
 		</div>
@@ -97,8 +98,17 @@
 
 	const MAX_IMAGES_UPLOAD = <?= MAX_IMAGES_UPLOAD ?>;
 
+	const IS_ADMIN_LOGGED_IN = <?= isset($_SESSION['admin_id']) ? 'true' : 'false' ?>;
+
 	// Année dynamique
 	document.getElementById('year').textContent = new Date().getFullYear();
+
+	document.getElementById('modalLogin').addEventListener('show.bs.modal', function(e) {
+		if (IS_ADMIN_LOGGED_IN) {
+			e.preventDefault();
+			window.location.href = 'admin.php';
+		}
+	});
 </script>
 
 <script src="app.js?<?= ASSET_TOKEN; ?>"></script>

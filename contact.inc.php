@@ -2,20 +2,20 @@
 	<div class="body p-4">
 		<form id="contactForm" method="post">
 			<div class="row g-3">
-				<div class="col-md-6">
-					<label class="form-label" for="nom">Nom <span class="text-danger">*</span></label>
+				<div class="col-12">
+					<label class="form-label" for="nom">Nom :</label>
 					<input class="form-control" type="text" id="nom" name="nom" placeholder="Votre nom" required>
 				</div>
 				<div class="col-md-6">
-					<label class="form-label" for="email">Email <span class="text-danger">*</span></label>
-					<input class="form-control" type="email" id="email" name="email" placeholder="vous@email.fr" required>
+					<label class="form-label" for="email">Email :</label>
+					<input class="form-control" type="email" id="email" name="email" placeholder="vous@email.fr">
 				</div>
 				<div class="col-md-6">
-					<label class="form-label" for="telephone">Téléphone (optionnel)</label>
+					<label class="form-label" for="telephone">Téléphone :</label>
 					<input class="form-control" type="tel" id="telephone" name="telephone" placeholder="+33 ...">
 				</div>
-				<div class="col-md-6">
-					<label class="form-label" for="sujet">Sujet <span class="text-danger">*</span></label>
+				<div class="col-12">
+					<label class="form-label" for="sujet">Sujet :</label>
 					<select class="form-select" id="sujet" name="sujet" required>
 						<option value="">Choisissez un sujet</option>
 						<option value="Vente">Vente</option>
@@ -25,11 +25,19 @@
 					</select>
 				</div>
 				<div class="col-12">
-					<label class="form-label" for="message">Message <span class="text-danger">*</span></label>
+					<label class="form-label" for="message">Message :</label>
 					<textarea class="form-control" id="message" name="message" rows="4" placeholder="Décrivez votre demande..." required></textarea>
 				</div>
 				<!-- Honeypot anti-spam (caché) -->
 				<input type="text" name="honeypot" style="display:none;" tabindex="-1" autocomplete="off">
+				<div class="col-12">
+					<div class="form-check">
+						<input class="form-check-input" type="checkbox" id="rgpd" name="rgpd" required>
+						<label class="form-check-label small text-muted" for="rgpd">
+							J'accepte la <a href="confidentialite.php" target="_blank" class="text-decoration-underline">politique de confidentialité</a> et le traitement de mes données personnelles conformément au RGPD.
+						</label>
+					</div>
+				</div>
 				<div class="col-12 text-center">
 					<button class="btn btn-sapin" type="submit" id="submitBtn">
 						<span id="btnText">Envoyer</span>
