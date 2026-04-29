@@ -65,7 +65,7 @@
 				<!-- Description -->
 				<div class="detail-description">
 					<h6 class="text-muted mb-2">Description</h6>
-					<p id="modalDetailDescription"></p>
+					<p id="modalDetailDescription" style="white-space: pre-wrap;"></p>
 				</div>
 			</div>
 			<div class="modal-footer">

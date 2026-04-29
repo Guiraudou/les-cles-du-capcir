@@ -270,6 +270,37 @@ class Bien
 	}
 
 	/**
+	 * Réordonne les images d'un bien
+	 */
+	public function reorderImages(int $bienId, array $filenames): bool
+	{
+		$biens = $this->db->read(self::FILENAME);
+
+		foreach ($biens as &$bien) {
+			if ($bien['id'] == $bienId) {
+				$indexed = [];
+				foreach ($bien['images'] as $img) {
+					$indexed[$img['filename']] = $img;
+				}
+
+				$reordered = [];
+				foreach ($filenames as $i => $filename) {
+					if (isset($indexed[$filename])) {
+						$indexed[$filename]['ordre'] = $i + 1;
+						$reordered[] = $indexed[$filename];
+					}
+				}
+
+				$bien['images'] = $reordered;
+				$this->db->write(self::FILENAME, $biens);
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
 	 * Supprime un fichier image physique
 	 */
 	private function deleteImageFile(string $filename): void

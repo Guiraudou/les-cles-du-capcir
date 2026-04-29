@@ -824,10 +824,17 @@ footer .border-top{
 	background: #198754;
 }
 
+#formAdd .current-images {
+	display: none;
+}
+
 .image-preview {
 	position: relative;
-	display: inline-block;
+	display: inline-flex;
+	flex-direction: column;
+	align-items: center;
 	margin: 5px;
+	gap: 4px;
 }
 
 .image-preview img {
@@ -845,6 +852,21 @@ footer .border-top{
 	height: 24px;
 	padding: 0;
 	border-radius: 50%;
+}
+
+.image-order-controls {
+	display: flex;
+	gap: 3px;
+}
+
+.image-order-controls .btn {
+	width: 28px;
+	height: 24px;
+	padding: 0;
+	font-size: 10px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
 }
 
 /* Zone de drag & drop pour les images */

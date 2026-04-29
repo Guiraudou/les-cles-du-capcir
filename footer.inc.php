@@ -42,8 +42,8 @@
 				<div class="col-12 col-md-6 text-end">
 					<div class="d-flex gap-3 justify-content-end flex-wrap small">
 						<div class="text-muted">© <span id="year"></span> Tous droits réservés</div>
-						<a href="#" class="link-underlined text-muted">Mentions légales</a>
-						<a href="#" class="link-underlined text-muted">Confidentialité</a>
+						<a href="mentions-legales.php" class="link-underlined text-muted">Mentions légales</a>
+						<a href="confidentialite.php" class="link-underlined text-muted">Confidentialité</a>
 						<a href="#" class="link-underlined text-muted" data-bs-toggle="modal" data-bs-target="#modalLogin">Administration</a>
 					</div>
 				</div>

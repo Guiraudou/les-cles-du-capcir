@@ -172,6 +172,8 @@ function handleContactForm(e) {
 let currentBienId = null;
 let allBiens = []; // Stocke tous les biens
 let currentFilter = 'all'; // Filtre actuel
+let currentEditImages = []; // Images en cours d'édition (pour le réordonnancement)
+let currentEditForm = null;  // Formulaire d'édition actif
 
 // WeakMap pour stocker les fichiers sélectionnés par formulaire
 const selectedFilesMap = new WeakMap();
@@ -817,30 +819,75 @@ function fillEditForm(bien) {
 	if (previewContainer) previewContainer.innerHTML = '';
 
 	// Afficher les images actuelles
-	displayCurrentImages(bien.id, bien.images || []);
+	currentEditForm = form;
+	displayCurrentImages(form, bien.id, bien.images || []);
 }
 
 /**
  * Affiche les images actuelles dans le formulaire d'édition
  */
-function displayCurrentImages(bienId, images) {
-	const container = document.querySelector('.current-images .images-list');
-	if (!container) return;
+function displayCurrentImages(form, bienId, images) {
+	currentEditImages = [...images];
+	const container = form.querySelector('.current-images .images-list');
+	if (!container) {
+		return;
+	}
 
 	if (images.length === 0) {
 		container.innerHTML = '<p class="text-muted">Aucune image</p>';
 		return;
 	}
 
-	container.innerHTML = images.map(img => `
+	container.innerHTML = images.map((img, index) => `
 		<div class="image-preview">
 			<img src="${img.url}" alt="Image">
+			<div class="image-order-controls">
+				<button type="button" class="btn btn-sm btn-secondary btn-order-up"
+						onclick="moveImage(${bienId}, ${index}, -1)"
+						${index === 0 ? 'disabled' : ''}>
+					<i class="fa-solid fa-arrow-up"></i>
+				</button>
+				<button type="button" class="btn btn-sm btn-secondary btn-order-down"
+						onclick="moveImage(${bienId}, ${index}, 1)"
+						${index === images.length - 1 ? 'disabled' : ''}>
+					<i class="fa-solid fa-arrow-down"></i>
+				</button>
+			</div>
 			<button type="button" class="btn btn-danger btn-sm btn-remove"
 					onclick="deleteImage(${bienId}, '${img.filename}')">
 				<i class="fa-solid fa-times"></i>
 			</button>
 		</div>
 	`).join('');
+}
+
+/**
+ * Déplace une image vers le haut ou vers le bas
+ */
+function moveImage(bienId, index, direction) {
+	const newIndex = index + direction;
+	if (newIndex < 0 || newIndex >= currentEditImages.length) return;
+
+	[currentEditImages[index], currentEditImages[newIndex]] = [currentEditImages[newIndex], currentEditImages[index]];
+
+	displayCurrentImages(currentEditForm, bienId, currentEditImages);
+
+	const filenames = currentEditImages.map(img => img.filename);
+	saveImageOrder(bienId, filenames);
+}
+
+/**
+ * Enregistre le nouvel ordre des images via l'API
+ */
+function saveImageOrder(bienId, filenames) {
+	const formData = new FormData();
+	formData.append('action', 'reorder-images');
+	formData.append('bien_id', bienId);
+	filenames.forEach(f => formData.append('filenames[]', f));
+
+	fetch('api/biens.php', { method: 'POST', body: formData })
+		.then(r => r.json())
+		.catch(err => console.error('Erreur réordonnancement:', err));
 }
 
 /**
@@ -872,7 +919,7 @@ function deleteImage(bienId, filename) {
 			.then(response => response.json())
 			.then(data => {
 				if (data.success) {
-					displayCurrentImages(bienId, data.data.images || []);
+					displayCurrentImages(currentEditForm, bienId, data.data.images || []);
 					showAlert('Image supprimée', 'success');
 				}
 			});

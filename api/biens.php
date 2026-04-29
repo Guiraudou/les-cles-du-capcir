@@ -188,6 +188,20 @@ switch ($action) {
 		}
 		break;
 
+	// Réordonner les images
+	case 'reorder-images':
+		$bienId = $_POST['bien_id'] ?? null;
+		$filenames = $_POST['filenames'] ?? [];
+
+		if (!$bienId || empty($filenames)) {
+			echo json_encode(['success' => false, 'message' => 'Paramètres manquants']);
+			break;
+		}
+
+		$reordered = $bienModel->reorderImages((int)$bienId, $filenames);
+		echo json_encode($reordered ? ['success' => true] : ['success' => false, 'message' => 'Erreur lors du réordonnancement']);
+		break;
+
 	// Supprimer une image
 	case 'delete-image':
 		$bienId = $_POST['bien_id'] ?? null;
