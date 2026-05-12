@@ -23,6 +23,7 @@ Osimatic\Data\JsonDB::initialize(__DIR__ . '/../data');
 define('ASSET_TOKEN', strtotime('2026-04-29 15:31:00'));
 
 // Contact
+define('SENDER_EMAIL', $secrets['contact']['sender_email']);
 define('EMAIL_DESTINATAIRE', $secrets['contact']['email']);
 define('PHONE', $secrets['contact']['phone']);
 

@@ -98,11 +98,11 @@ require_once 'model/config.php';
 					<tbody>
 						<tr>
 							<td>Gestion de location saisonnière</td>
-							<td class="text-end">De 25 % à 35 %</td>
+							<td class="text-end">Nous consulter *</td>
 						</tr>
 					</tbody>
 				</table>
-				<p class="text-muted small mb-2">Le taux d'honoraires appliqué est déterminé en fonction des caractéristiques du bien, notamment sa typologie, son état général, le niveau de prestation attendu, le prix de la nuitée pratiqué ainsi que la complexité de gestion du logement.</p>
+				<p class="text-muted small mb-2">* Le taux d'honoraires appliqué est déterminé en fonction des caractéristiques du bien, notamment sa typologie, son état général, le niveau de prestation attendu, le prix de la nuitée pratiqué ainsi que la complexité de gestion du logement.</p>
 				<p class="text-muted small mb-5">Le taux exact est défini contractuellement avant le début de la mission.</p>
 
 			</div>

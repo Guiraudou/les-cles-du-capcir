@@ -90,10 +90,12 @@ $emailBody = '
 				<div class="label">Nom :</div>
 				<div class="value">' . htmlspecialchars($nom) . '</div>
 			</div>
+			' . (!empty($email) ? '
 			<div class="field">
 				<div class="label">Email :</div>
 				<div class="value"><a href="mailto:' . htmlspecialchars($email) . '">' . htmlspecialchars($email) . '</a></div>
 			</div>
+			' : '') . '
 			' . (!empty($telephone) ? '
 			<div class="field">
 				<div class="label">Téléphone :</div>
@@ -118,18 +120,27 @@ $emailBody = '
 </html>
 ';
 
+// Encoder le nom de l'expéditeur (RFC 2047) pour accepter les caractères non-ASCII
+$fromName = '=?UTF-8?B?' . base64_encode(SITE_NAME) . '?=';
+
 // En-têtes de l'email
+// From: adresse du domaine pour passer DMARC ; le visiteur est en Reply-To
 $headers = [
 	'MIME-Version: 1.0',
 	'Content-Type: text/html; charset=UTF-8',
-	'From: ' . $email,
-	'Reply-To: ' . $email,
+	'From: ' . $fromName . ' <' . SENDER_EMAIL . '>',
 	'Cc: benoit.guiraudou@gmail.com',
 	'X-Mailer: PHP/' . PHP_VERSION
 ];
 
-// Envoi de l'email
-$emailSent = mail($to, $subject, $emailBody, implode("\r\n", $headers));
+// Reply-To uniquement si le visiteur a renseigné un email
+if (!empty($email)) {
+	$replyToName = '=?UTF-8?B?' . base64_encode($nom) . '?=';
+	$headers[] = 'Reply-To: ' . $replyToName . ' <' . $email . '>';
+}
+
+// Envoi de l'email (-f définit le Return-Path/envelope sender pour SPF)
+$emailSent = mail($to, $subject, $emailBody, implode("\r\n", $headers), '-f' . SENDER_EMAIL);
 
 if (!$emailSent) {
 	http_response_code(500);
