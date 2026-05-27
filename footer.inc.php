@@ -46,7 +46,7 @@
 						<a href="confidentialite.php" class="link-underlined text-muted">Confidentialité</a>
 						<a href="#" class="link-underlined text-muted" data-bs-toggle="modal" data-bs-target="#modalLogin">Administration</a>
 					</div>
-					<div class="text-muted small">© <span id="year"></span> Tous droits réservés</div>
+					<div class="text-muted small">© <span id="year"></span> Les Clés du Capcir — Tous droits réservés</div>
 				</div>
 			</div>
 		</div>

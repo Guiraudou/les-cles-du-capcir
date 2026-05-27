@@ -1,5 +1,7 @@
 <?php
 require_once 'model/config.php';
+$meta_title = 'Mentions légales | ' . SITE_NAME;
+$meta_description = 'Mentions légales du site Les Clés du Capcir, agence immobilière et conciergerie au Capcir.';
 ?>
 <?php require_once 'header.inc.php'; ?>
 

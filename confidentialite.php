@@ -1,5 +1,7 @@
 <?php
 require_once 'model/config.php';
+$meta_title = 'Politique de confidentialité | ' . SITE_NAME;
+$meta_description = 'Politique de confidentialité et protection des données personnelles de Les Clés du Capcir.';
 ?>
 <?php require_once 'header.inc.php'; ?>
 

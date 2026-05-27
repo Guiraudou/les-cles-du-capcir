@@ -1,4 +1,8 @@
 <?php require_once 'model/config.php'; ?>
+<?php
+$meta_title = 'Vente immobilière & Conciergerie au Capcir | ' . SITE_NAME;
+$meta_description = 'Les Clés du Capcir : vente immobilière et conciergerie locative au cœur du Capcir. Chalets, appartements, gestion de location saisonnière. Contactez-nous.';
+?>
 <?php require_once 'header.inc.php'; ?>
 
 <!-- HERO (with integrated menu) -->

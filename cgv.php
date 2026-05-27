@@ -1,5 +1,7 @@
 <?php
 require_once 'model/config.php';
+$meta_title = 'Conditions Générales de Vente | ' . SITE_NAME;
+$meta_description = 'Conditions générales de vente de Les Clés du Capcir, agence immobilière et conciergerie au Capcir (Pyrénées-Orientales).';
 ?>
 <?php require_once 'header.inc.php'; ?>
 

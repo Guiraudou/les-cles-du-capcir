@@ -17,6 +17,13 @@ $pageTitle = $type === 'vente' ? 'Biens à vendre' : 'Biens en location';
 $pageDescription = $type === 'vente'
 	? 'Découvrez tous nos biens à vendre dans le Capcir'
 	: 'Découvrez tous nos biens en location dans le Capcir';
+
+$meta_title = $type === 'vente'
+	? 'Biens immobiliers à vendre au Capcir | ' . SITE_NAME
+	: 'Locations saisonnières au Capcir | ' . SITE_NAME;
+$meta_description = $type === 'vente'
+	? 'Achetez un bien immobilier au Capcir : chalets et appartements à Les Angles, Formiguères, Puyvalador. Honoraires transparents. Contactez-nous.'
+	: 'Découvrez nos locations saisonnières au Capcir : chalets et appartements à Les Angles, Formiguères, Puyvalador. Réservez en ligne.';
 ?>
 <?php require_once 'header.inc.php'; ?>
 
@@ -37,15 +44,67 @@ $pageDescription = $type === 'vente'
 <!-- Liste des biens -->
 <section class="py-5">
 	<div class="container">
+
+		<?php if ($type === 'location' && !empty($biens)):
+			$villes = array_unique(array_filter(array_column($biens, 'city')));
+			sort($villes);
+		?>
+		<!-- Filtres (location uniquement) -->
+		<div class="card border-0 shadow-sm mb-4 p-3">
+			<div class="row g-2 align-items-end">
+				<div class="col-12 col-sm-6 col-lg-3">
+					<label for="filter-city" class="form-label small fw-bold mb-1">Lieu</label>
+					<select id="filter-city" class="form-select form-select-sm">
+						<option value="">Tous les lieux</option>
+						<?php foreach ($villes as $ville): ?>
+							<option value="<?= htmlspecialchars($ville) ?>"><?= htmlspecialchars($ville) ?></option>
+						<?php endforeach; ?>
+					</select>
+				</div>
+				<div class="col-12 col-sm-6 col-lg-3">
+					<label for="filter-personnes" class="form-label small fw-bold mb-1">Capacité</label>
+					<select id="filter-personnes" class="form-select form-select-sm">
+						<option value="0">Toutes capacités</option>
+						<option value="2">Au moins 2 pers.</option>
+						<option value="4">Au moins 4 pers.</option>
+						<option value="6">Au moins 6 pers.</option>
+						<option value="8">Au moins 8 pers.</option>
+					</select>
+				</div>
+				<div class="col-12 col-sm-6 col-lg-3">
+					<label for="filter-surface" class="form-label small fw-bold mb-1">Surface</label>
+					<select id="filter-surface" class="form-select form-select-sm">
+						<option value="">Toutes surfaces</option>
+						<option value="small">Moins de 30 m²</option>
+						<option value="medium">30 à 60 m²</option>
+						<option value="large">Plus de 60 m²</option>
+					</select>
+				</div>
+				<div class="col-12 col-sm-6 col-lg-3 d-flex align-items-end gap-2">
+					<button type="button" id="reset-filters" class="btn btn-outline-secondary btn-sm">
+						<i class="fa-solid fa-xmark"></i> Effacer
+					</button>
+					<span id="filter-count" class="text-muted small"></span>
+				</div>
+			</div>
+			<div id="no-results" class="alert alert-warning mt-3 mb-0 d-none">
+				<i class="fa-solid fa-triangle-exclamation"></i> Aucun bien ne correspond à ces critères.
+			</div>
+		</div>
+		<?php endif; ?>
+
 		<?php if (empty($biens)): ?>
 			<div class="alert alert-info text-center">
 				<i class="fa-solid fa-info-circle fa-2x mb-3"></i>
 				<p class="mb-0">Aucun bien <?= $type === 'vente' ? 'à vendre' : 'en location' ?> pour le moment.</p>
 			</div>
 		<?php else: ?>
-			<div class="row g-4">
+			<div id="biens-grid" class="row g-4">
 				<?php foreach ($biens as $bien): ?>
-					<div class="col-md-6 col-lg-4">
+					<div class="col-md-6 col-lg-4 filter-card"
+						data-city="<?= htmlspecialchars($bien['city'] ?? '') ?>"
+						data-personnes="<?= intval($bien['nb_personnes'] ?? 0) ?>"
+						data-surface="<?= floatval($bien['surface'] ?? 0) ?>">
 						<div class="listing h-100">
 							<div class="listing-image-container">
 								<?php if (!empty($bien['images'])): ?>
@@ -123,5 +182,74 @@ $pageDescription = $type === 'vente'
 <?php include 'booking.inc.php'; ?>
 
 <?php include 'bien.inc.php'; ?>
+
+<?php if ($type === 'location'): ?>
+<script>
+(function () {
+	const filterCity     = document.getElementById('filter-city');
+	const filterPersonnes = document.getElementById('filter-personnes');
+	const filterSurface  = document.getElementById('filter-surface');
+	const resetBtn       = document.getElementById('reset-filters');
+	const countLabel     = document.getElementById('filter-count');
+	const noResults      = document.getElementById('no-results');
+	const cards          = document.querySelectorAll('.filter-card');
+
+	function applyFilters() {
+		const city     = filterCity ? filterCity.value : '';
+		const personnes = filterPersonnes ? parseInt(filterPersonnes.value) : 0;
+		const surface  = filterSurface ? filterSurface.value : '';
+		let visible = 0;
+
+		cards.forEach(function (card) {
+			let show = true;
+
+			if (city && card.dataset.city !== city) {
+				show = false;
+			}
+
+			if (personnes > 0) {
+				const cardPersonnes = parseInt(card.dataset.personnes) || 0;
+				if (cardPersonnes < personnes) show = false;
+			}
+
+			if (surface) {
+				const s = parseFloat(card.dataset.surface) || 0;
+				if (surface === 'small'  && s >= 30) show = false;
+				if (surface === 'medium' && (s < 30 || s > 60)) show = false;
+				if (surface === 'large'  && s <= 60) show = false;
+			}
+
+			card.style.display = show ? '' : 'none';
+			if (show) visible++;
+		});
+
+		if (countLabel) {
+			countLabel.textContent = visible + ' bien' + (visible !== 1 ? 's' : '');
+		}
+		if (noResults) {
+			noResults.classList.toggle('d-none', visible > 0);
+		}
+	}
+
+	if (filterCity)     filterCity.addEventListener('change', applyFilters);
+	if (filterPersonnes) filterPersonnes.addEventListener('change', applyFilters);
+	if (filterSurface)  filterSurface.addEventListener('change', applyFilters);
+
+	if (resetBtn) {
+		resetBtn.addEventListener('click', function () {
+			if (filterCity)     filterCity.value = '';
+			if (filterPersonnes) filterPersonnes.value = '0';
+			if (filterSurface)  filterSurface.value = '';
+			applyFilters();
+		});
+	}
+
+	// Compteur initial
+	if (countLabel) {
+		countLabel.textContent = cards.length + ' bien' + (cards.length !== 1 ? 's' : '');
+	}
+})();
+</script>
+<?php endif; ?>
 
 <?php require_once 'footer.inc.php'; ?>

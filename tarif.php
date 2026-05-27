@@ -1,5 +1,7 @@
 <?php
 require_once 'model/config.php';
+$meta_title = 'Tarifs conciergerie et transaction immobilière | ' . SITE_NAME;
+$meta_description = 'Consultez nos tarifs pour la transaction immobilière et la conciergerie locative au Capcir. Honoraires TTC transparents et dégressifs.';
 ?>
 <?php require_once 'header.inc.php'; ?>
 
