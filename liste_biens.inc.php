@@ -42,7 +42,7 @@ $meta_description = $type === 'vente'
 </section>
 
 <!-- Liste des biens -->
-<section class="py-5">
+<section class="pb-5">
 	<div class="container">
 
 		<?php if ($type === 'location' && !empty($biens)):
@@ -50,7 +50,7 @@ $meta_description = $type === 'vente'
 			sort($villes);
 		?>
 		<!-- Filtres (location uniquement) -->
-		<div class="card border-0 shadow-sm mb-4 p-3">
+		<div class="card listing mb-4 p-3">
 			<div class="row g-2 align-items-end">
 				<div class="col-12 col-sm-6 col-lg-3">
 					<label for="filter-city" class="form-label small fw-bold mb-1">Lieu</label>
@@ -80,12 +80,14 @@ $meta_description = $type === 'vente'
 						<option value="large">Plus de 60 m²</option>
 					</select>
 				</div>
-				<div class="col-12 col-sm-6 col-lg-3 d-flex align-items-end gap-2">
+				<div class="col-12 col-sm-6 col-lg-3 d-flex align-items-end">
 					<button type="button" id="reset-filters" class="btn btn-outline-secondary btn-sm">
-						<i class="fa-solid fa-xmark"></i> Effacer
+						<i class="fa-solid fa-xmark"></i> Effacer les filtres
 					</button>
-					<span id="filter-count" class="text-muted small"></span>
 				</div>
+			</div>
+			<div class="border-top mt-3 pt-2 text-center small text-muted">
+				<span id="filter-count"></span>
 			</div>
 			<div id="no-results" class="alert alert-warning mt-3 mb-0 d-none">
 				<i class="fa-solid fa-triangle-exclamation"></i> Aucun bien ne correspond à ces critères.
@@ -223,8 +225,15 @@ $meta_description = $type === 'vente'
 			if (show) visible++;
 		});
 
+		const isFiltered = (filterCity && filterCity.value) ||
+			(filterPersonnes && parseInt(filterPersonnes.value) > 0) ||
+			(filterSurface && filterSurface.value);
+
 		if (countLabel) {
-			countLabel.textContent = visible + ' bien' + (visible !== 1 ? 's' : '');
+			const label = visible + ' bien' + (visible !== 1 ? 's' : '');
+			countLabel.innerHTML = isFiltered
+				? '<i class="fa-solid fa-filter me-1"></i><strong>' + label + '</strong> selon ces critères'
+				: '<i class="fa-solid fa-house me-1"></i><strong>' + label + '</strong> disponible' + (visible !== 1 ? 's' : '');
 		}
 		if (noResults) {
 			noResults.classList.toggle('d-none', visible > 0);
@@ -245,9 +254,7 @@ $meta_description = $type === 'vente'
 	}
 
 	// Compteur initial
-	if (countLabel) {
-		countLabel.textContent = cards.length + ' bien' + (cards.length !== 1 ? 's' : '');
-	}
+	applyFilters();
 })();
 </script>
 <?php endif; ?>
