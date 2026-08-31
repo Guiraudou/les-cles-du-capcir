@@ -1,6 +1,8 @@
 <?php
 require_once '../model/config.php';
 
+use Osimatic\Calendar\SqlDate;
+
 header('Content-Type: application/json');
 
 $userModel = new User();
@@ -55,15 +57,19 @@ try {
 
 		case 'rates':
 			$apartmentId = $_GET['id'] ?? '';
+			$startDate = $_GET['start_date'] ?? date('Y-m-d');
 
 			if (empty($apartmentId) || !is_numeric($apartmentId)) {
 				throw new Exception('ID Smoobu invalide');
 			}
+			if (!SqlDate::isValid($startDate) || $startDate < date('Y-m-d')) {
+				throw new Exception('Date de début invalide');
+			}
 
 			$rates = $smoobu->getRates([
 				'apartments' => [(int)$apartmentId],
-				'start_date' => date('Y-m-d'),
-				'end_date' => date('Y-m-d', strtotime('+2 months')),
+				'start_date' => $startDate,
+				'end_date' => date('Y-m-d', strtotime($startDate . ' +2 months')),
 			]);
 
 			echo json_encode([

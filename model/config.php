@@ -30,7 +30,7 @@ define('EMAIL_DESTINATAIRE', $secrets['contact']['email']);
 define('PHONE', $secrets['contact']['phone']);
 
 // Informations du site
-define('SITE_NAME', 'Les clés du Capcir');
+define('SITE_NAME', 'Les Clés du Capcir');
 define('SITE_URL', 'https://lesclesducapcir.fr');
 
 // Chemins uploads

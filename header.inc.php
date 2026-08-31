@@ -50,7 +50,7 @@ $isIndex = ($currentPage === 'index.php');
 	<nav class="navbar navbar-dark mb-4">
 		<div class="container-fluid">
 			<span class="navbar-brand">
-				<i class="fa-solid fa-key"></i> Administration - Les clés du Capcir
+				<i class="fa-solid fa-key"></i> Administration - Les Clés du Capcir
 			</span>
 			<div class="d-flex gap-2">
 				<span class="navbar-text text-white me-3">
@@ -68,8 +68,8 @@ $isIndex = ($currentPage === 'index.php');
 	<nav id="stickyNav" class="navbar navbar-expand-lg sticky-nav <?= !$isIndex ? 'always-visible' : '' ?>">
 		<div class="container py-1">
 			<a class="navbar-brand" href="index.php">
-				<img src="images/logo.png" alt="Les clés du Capcir">
-				Les clés du Capcir
+				<img src="images/logo.png" alt="Les Clés du Capcir">
+				Les Clés du Capcir
 			</a>
 
 			<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#stickyMenu">

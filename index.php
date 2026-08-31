@@ -10,7 +10,7 @@ $meta_description = 'Les Clés du Capcir : vente immobilière et conciergerie lo
 
 	<!-- Logo en haut à gauche -->
 	<div class="hero-logo-corner">
-		<img src="images/logo.png" alt="Les clés du Capcir">
+		<img src="images/logo.png" alt="Les Clés du Capcir">
 	</div>
 
 	<!-- integrated menu in hero -->
@@ -53,7 +53,7 @@ $meta_description = 'Les Clés du Capcir : vente immobilière et conciergerie lo
 		<div class="row">
 			<div class="col-lg-8 col-xl-9 hero-content">
 				<div class="brand-title mb-2">
-					Les clés du Capcir
+					Les Clés du Capcir
 				</div>
 				<h1 class="display-5 fw-bold mb-4">
 					Vente & Conciergerie<br>

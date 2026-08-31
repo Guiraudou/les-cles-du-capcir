@@ -81,7 +81,9 @@
 						<span class="legende-item"><span class="legende-dot dispo"></span> Disponible</span>
 						<span class="legende-item"><span class="legende-dot occupe"></span> Occupé</span>
 						<span class="legende-item"><span class="legende-dot passe"></span> Passé</span>
+						<span class="legende-item"><span class="legende-dot inconnu"></span> Non disponible en ligne</span>
 					</div>
+					<p class="text-muted small mt-2 mb-0">Cliquez sur une date d'arrivée puis une date de départ pour réserver directement.</p>
 				</div>
 			</div>
 			<div class="modal-footer">

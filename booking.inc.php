@@ -36,9 +36,13 @@
 
 					<h6 class="text-muted mb-3"><i class="fa-solid fa-user me-2"></i>Vos coordonnées</h6>
 					<div class="row g-3 mb-4">
-						<div class="col-12">
-							<label class="form-label fw-semibold">Nom complet <span class="text-danger">*</span></label>
-							<input type="text" id="booking-guest-name" class="form-control" placeholder="Prénom Nom">
+						<div class="col-md-6">
+							<label class="form-label fw-semibold">Prénom <span class="text-danger">*</span></label>
+							<input type="text" id="booking-guest-firstname" class="form-control" placeholder="Prénom">
+						</div>
+						<div class="col-md-6">
+							<label class="form-label fw-semibold">Nom <span class="text-danger">*</span></label>
+							<input type="text" id="booking-guest-lastname" class="form-control" placeholder="Nom">
 						</div>
 						<div class="col-md-6">
 							<label class="form-label fw-semibold">Email <span class="text-danger">*</span></label>

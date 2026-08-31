@@ -16,8 +16,8 @@
 
 			<!-- Colonne 2 : Logo et titre (centre) -->
 			<div class="col-12 col-md-4 text-center order-1 order-md-2">
-				<img src="images/logo_white.png" alt="Les clés du Capcir" class="footer-logo">
-				<h5 class="fw-bold mb-2">Les clés du Capcir</h5>
+				<img src="images/logo_white.png" alt="Les Clés du Capcir" class="footer-logo">
+				<h5 class="fw-bold mb-2">Les Clés du Capcir</h5>
 				<p class="text-muted small mb-3">Vente & Conciergerie au cœur du Capcir</p>
 			</div>
 

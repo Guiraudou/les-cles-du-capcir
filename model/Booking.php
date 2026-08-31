@@ -29,7 +29,8 @@ class Booking
 		$dateFrom = $input['date_from'] ?? '';
 		$dateTo = $input['date_to'] ?? '';
 		$titreBien = $input['titre'] ?? 'Séjour Les Clés du Capcir';
-		$guestName = trim($input['guest_name'] ?? '');
+		$guestFirstname = trim($input['guest_firstname'] ?? '');
+		$guestLastname = trim($input['guest_lastname'] ?? '');
 		$guestEmail = trim($input['guest_email'] ?? '');
 		$guestPhone = trim($input['guest_phone'] ?? '');
 
@@ -39,8 +40,8 @@ class Booking
 		if (!SqlDate::isValid($dateFrom) || !SqlDate::isValid($dateTo) || $dateFrom >= $dateTo || $dateFrom < date('Y-m-d')) {
 			throw new Exception('Plage de dates invalide');
 		}
-		if (empty($guestName) || empty($guestEmail)) {
-			throw new Exception('Nom et email obligatoires');
+		if (empty($guestFirstname) || empty($guestLastname) || empty($guestEmail)) {
+			throw new Exception('Prénom, nom et email obligatoires');
 		}
 		if (!filter_var($guestEmail, FILTER_VALIDATE_EMAIL)) {
 			throw new Exception('Email invalide');
@@ -50,7 +51,8 @@ class Booking
 			'apartment_id' => (int)$apartmentId,
 			'date_from' => $dateFrom,
 			'date_to' => $dateTo,
-			'guest_name' => $guestName,
+			'guest_firstname' => $guestFirstname,
+			'guest_lastname' => $guestLastname,
 			'guest_email' => $guestEmail,
 			'guest_phone' => $guestPhone,
 			'titre' => $titreBien,
@@ -200,7 +202,8 @@ class Booking
 				'apartment_id' => $booking['apartment_id'],
 				'date_from' => $booking['date_from'],
 				'date_to' => $booking['date_to'],
-				'guest_name' => $booking['guest_name'],
+				'guest_firstname' => $booking['guest_firstname'],
+				'guest_lastname' => $booking['guest_lastname'],
 				'guest_email' => $booking['guest_email'],
 				'guest_phone' => $booking['guest_phone'],
 				'nights' => $pricing['nights'],
@@ -245,7 +248,9 @@ class Booking
 		$apartmentId = $session->metadata->apartment_id ?? null;
 		$dateFrom = $session->metadata->date_from ?? null;
 		$dateTo = $session->metadata->date_to ?? null;
-		$guestName = $session->metadata->guest_name ?? '';
+		$firstName = $session->metadata->guest_firstname ?? '';
+		$lastName = $session->metadata->guest_lastname ?? '';
+		$guestName = trim("{$firstName} {$lastName}");
 		$guestEmail = $session->metadata->guest_email ?? $session->customer_email ?? '';
 		$guestPhone = $session->metadata->guest_phone ?? '';
 		$nights = $session->metadata->nights ?? 1;
@@ -255,10 +260,6 @@ class Booking
 		if (!$apartmentId || !$dateFrom || !$dateTo) {
 			return ['status' => 400, 'body' => 'Métadonnées manquantes'];
 		}
-
-		$nameParts = explode(' ', $guestName, 2);
-		$firstName = $nameParts[0] ?? $guestName;
-		$lastName = $nameParts[1] ?? '';
 
 		try {
 			// Revérifier la disponibilité juste avant de créer la réservation : le bien a pu être

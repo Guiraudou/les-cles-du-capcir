@@ -72,12 +72,13 @@ $meta_description = $type === 'vente'
 					</select>
 				</div>
 				<div class="col-12 col-sm-6 col-lg-3">
-					<label for="filter-surface" class="form-label small fw-bold mb-1">Surface</label>
-					<select id="filter-surface" class="form-select form-select-sm">
-						<option value="">Toutes surfaces</option>
-						<option value="small">Moins de 30 m²</option>
-						<option value="medium">30 à 60 m²</option>
-						<option value="large">Plus de 60 m²</option>
+					<label for="filter-chambres" class="form-label small fw-bold mb-1">Nombre de chambres</label>
+					<select id="filter-chambres" class="form-select form-select-sm">
+						<option value="0">Toutes chambres</option>
+						<option value="1">Au moins 1 chambre</option>
+						<option value="2">Au moins 2 chambres</option>
+						<option value="3">Au moins 3 chambres</option>
+						<option value="4">Au moins 4 chambres</option>
 					</select>
 				</div>
 				<div class="col-12 col-sm-6 col-lg-3 d-flex align-items-end">
@@ -106,7 +107,7 @@ $meta_description = $type === 'vente'
 					<div class="col-md-6 col-lg-4 filter-card"
 						data-city="<?= htmlspecialchars($bien['city'] ?? '') ?>"
 						data-personnes="<?= intval($bien['nb_personnes'] ?? 0) ?>"
-						data-surface="<?= floatval($bien['surface'] ?? 0) ?>">
+						data-chambres="<?= intval($bien['nb_chambres'] ?? 0) ?>">
 						<div class="listing h-100">
 							<div class="listing-image-container">
 								<?php if (!empty($bien['images'])): ?>
@@ -190,7 +191,7 @@ $meta_description = $type === 'vente'
 (function () {
 	const filterCity     = document.getElementById('filter-city');
 	const filterPersonnes = document.getElementById('filter-personnes');
-	const filterSurface  = document.getElementById('filter-surface');
+	const filterChambres = document.getElementById('filter-chambres');
 	const resetBtn       = document.getElementById('reset-filters');
 	const countLabel     = document.getElementById('filter-count');
 	const noResults      = document.getElementById('no-results');
@@ -199,7 +200,7 @@ $meta_description = $type === 'vente'
 	function applyFilters() {
 		const city     = filterCity ? filterCity.value : '';
 		const personnes = filterPersonnes ? parseInt(filterPersonnes.value) : 0;
-		const surface  = filterSurface ? filterSurface.value : '';
+		const chambres  = filterChambres ? parseInt(filterChambres.value) : 0;
 		let visible = 0;
 
 		cards.forEach(function (card) {
@@ -214,11 +215,9 @@ $meta_description = $type === 'vente'
 				if (cardPersonnes < personnes) show = false;
 			}
 
-			if (surface) {
-				const s = parseFloat(card.dataset.surface) || 0;
-				if (surface === 'small'  && s >= 30) show = false;
-				if (surface === 'medium' && (s < 30 || s > 60)) show = false;
-				if (surface === 'large'  && s <= 60) show = false;
+			if (chambres > 0) {
+				const cardChambres = parseInt(card.dataset.chambres) || 0;
+				if (cardChambres < chambres) show = false;
 			}
 
 			card.style.display = show ? '' : 'none';
@@ -227,7 +226,7 @@ $meta_description = $type === 'vente'
 
 		const isFiltered = (filterCity && filterCity.value) ||
 			(filterPersonnes && parseInt(filterPersonnes.value) > 0) ||
-			(filterSurface && filterSurface.value);
+			(filterChambres && parseInt(filterChambres.value) > 0);
 
 		if (countLabel) {
 			const label = visible + ' bien' + (visible !== 1 ? 's' : '');
@@ -242,13 +241,13 @@ $meta_description = $type === 'vente'
 
 	if (filterCity)     filterCity.addEventListener('change', applyFilters);
 	if (filterPersonnes) filterPersonnes.addEventListener('change', applyFilters);
-	if (filterSurface)  filterSurface.addEventListener('change', applyFilters);
+	if (filterChambres) filterChambres.addEventListener('change', applyFilters);
 
 	if (resetBtn) {
 		resetBtn.addEventListener('click', function () {
 			if (filterCity)     filterCity.value = '';
 			if (filterPersonnes) filterPersonnes.value = '0';
-			if (filterSurface)  filterSurface.value = '';
+			if (filterChambres) filterChambres.value = '0';
 			applyFilters();
 		});
 	}

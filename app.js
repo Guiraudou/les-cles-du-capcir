@@ -1074,19 +1074,9 @@ function displayBienDetail(bien) {
 
 	// Calendrier de disponibilités (locations avec id_smoobu uniquement)
 	const calContainer = document.getElementById('modalDetailCalendrierContainer');
-	const calEl = document.getElementById('modalDetailCalendrier');
 	if (bien.statut === 'location' && bien.id_smoobu) {
 		calContainer.style.display = 'block';
-		calEl.innerHTML = '<div class="text-center text-muted py-3"><div class="spinner-border spinner-border-sm me-2"></div>Chargement du calendrier...</div>';
-		fetch(`api/smoobu.php?action=rates&id=${bien.id_smoobu}`)
-			.then(r => r.json())
-			.then(data => {
-				if (!data.success) throw new Error('Erreur API');
-				calEl.innerHTML = renderCalendrierDispo(data.data, bien.id_smoobu);
-			})
-			.catch(() => {
-				calEl.innerHTML = '<p class="text-muted text-center">Impossible de charger le calendrier.</p>';
-			});
+		loadCalendrier(bien.id_smoobu, bien.titre);
 	} else {
 		calContainer.style.display = 'none';
 	}
@@ -1095,24 +1085,131 @@ function displayBienDetail(bien) {
 	new bootstrap.Modal(document.getElementById('modalDetailBien')).show();
 }
 
+// État du calendrier de disponibilités affiché dans la modal de détail d'un bien
+let calState = { apartmentId: null, titre: '', monthOffset: 0, selectionStart: null };
+
 /**
- * Génère le HTML du calendrier de disponibilités sur 2 mois
+ * Formate une date en YYYY-MM-DD (heure locale, sans décalage UTC)
  */
-function renderCalendrierDispo(ratesData, apartmentId) {
+function formatDateYMD(date) {
+	return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+}
+
+/**
+ * Charge et affiche le calendrier de disponibilités d'un appartement à partir du mois courant + monthOffset
+ */
+function loadCalendrier(apartmentId, titre, monthOffset = 0) {
+	calState = { apartmentId, titre, monthOffset, selectionStart: null };
+
+	const calEl = document.getElementById('modalDetailCalendrier');
+	calEl.innerHTML = '<div class="text-center text-muted py-3"><div class="spinner-border spinner-border-sm me-2"></div>Chargement du calendrier...</div>';
+
+	const today = new Date();
+	const baseDate = new Date(today.getFullYear(), today.getMonth() + monthOffset, 1);
+	const rangeStart = monthOffset === 0 ? today : baseDate;
+
+	fetch(`api/smoobu.php?action=rates&id=${apartmentId}&start_date=${formatDateYMD(rangeStart)}`)
+		.then(r => r.json())
+		.then(data => {
+			if (!data.success) throw new Error('Erreur API');
+			calEl.innerHTML = renderCalendrierDispo(data.data, apartmentId, baseDate, monthOffset);
+		})
+		.catch(() => {
+			calEl.innerHTML = '<p class="text-muted text-center">Impossible de charger le calendrier.</p>';
+		});
+}
+
+/**
+ * Change le mois affiché par le calendrier (delta en nombre de mois, borné à partir du mois courant)
+ */
+function calendrierChangerMois(delta) {
+	const newOffset = Math.max(0, calState.monthOffset + delta);
+	if (newOffset === calState.monthOffset) return;
+	loadCalendrier(calState.apartmentId, calState.titre, newOffset);
+}
+
+/**
+ * Prévisualise au survol la plage sélectionnée entre le jour de départ choisi et le jour survolé
+ */
+function calendrierSurvolJour(dateStr) {
+	if (!calState.selectionStart) return;
+	document.querySelectorAll('.cal-jour.cal-dispo[data-date]').forEach(el => {
+		el.classList.toggle('cal-range-hover', el.dataset.date > calState.selectionStart && el.dataset.date <= dateStr);
+	});
+}
+
+/**
+ * Efface la prévisualisation de survol (quand la souris quitte le calendrier)
+ */
+function calendrierEffacerSurvol() {
+	document.querySelectorAll('.cal-jour.cal-range-hover').forEach(el => el.classList.remove('cal-range-hover'));
+}
+
+/**
+ * Gère le clic sur un jour disponible : premier clic = date de départ, second clic = date de retour
+ * qui ouvre directement le tunnel de réservation avec les dates pré-remplies.
+ */
+function calendrierClicJour(dateStr) {
+	if (!calState.selectionStart || dateStr <= calState.selectionStart) {
+		// Reclic sur le jour de départ déjà sélectionné : on annule la sélection
+		calState.selectionStart = (calState.selectionStart === dateStr) ? null : dateStr;
+		document.querySelectorAll('.cal-jour.cal-selected-start').forEach(el => el.classList.remove('cal-selected-start'));
+		if (calState.selectionStart) {
+			document.querySelector(`.cal-jour[data-date="${calState.selectionStart}"]`)?.classList.add('cal-selected-start');
+		}
+		calendrierEffacerSurvol();
+		return;
+	}
+
+	// Page sans tunnel de réservation (ex: back-office) : la sélection ne mène nulle part
+	const bookingModalEl = document.getElementById('modal_booking');
+	if (!bookingModalEl) {
+		calState.selectionStart = null;
+		return;
+	}
+
+	const dateFrom = calState.selectionStart;
+	const dateTo = dateStr;
+	const { apartmentId, titre } = calState;
+	calState.selectionStart = null;
+
+	const openTunnel = () => openBookingModal(apartmentId, titre, { from: dateFrom, to: dateTo });
+
+	const detailModalEl = document.getElementById('modalDetailBien');
+	const detailModal = detailModalEl ? bootstrap.Modal.getInstance(detailModalEl) : null;
+	if (detailModal) {
+		detailModalEl.addEventListener('hidden.bs.modal', function handler() {
+			detailModalEl.removeEventListener('hidden.bs.modal', handler);
+			openTunnel();
+		}, { once: true });
+		detailModal.hide();
+	} else {
+		openTunnel();
+	}
+}
+
+/**
+ * Génère le HTML du calendrier de disponibilités sur 2 mois à partir de baseDate
+ */
+function renderCalendrierDispo(ratesData, apartmentId, baseDate, monthOffset) {
 	const today = new Date();
 	today.setHours(0, 0, 0, 0);
 
-	// Indexer les tarifs par date
-	const ratesByDate = {};
 	const apartmentRates = ratesData?.data?.[apartmentId] ?? {};
-	for (const [date, info] of Object.entries(apartmentRates)) {
-		ratesByDate[date] = info;
-	}
 
-	let html = '<div class="calendrier-mois-wrapper">';
+	let html = `
+		<div class="calendrier-nav">
+			<button type="button" class="btn btn-sm btn-outline-sapin" onclick="calendrierChangerMois(-1)" aria-label="Mois précédent" ${monthOffset <= 0 ? 'disabled' : ''}>
+				<i class="fa-solid fa-chevron-left"></i>
+			</button>
+			<button type="button" class="btn btn-sm btn-outline-sapin" onclick="calendrierChangerMois(1)" aria-label="Mois suivant">
+				<i class="fa-solid fa-chevron-right"></i>
+			</button>
+		</div>
+		<div class="calendrier-mois-wrapper" onmouseleave="calendrierEffacerSurvol()">`;
 
 	for (let m = 0; m < 2; m++) {
-		const d = new Date(today.getFullYear(), today.getMonth() + m, 1);
+		const d = new Date(baseDate.getFullYear(), baseDate.getMonth() + m, 1);
 		const year = d.getFullYear();
 		const month = d.getMonth();
 		const monthName = d.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
@@ -1138,28 +1235,40 @@ function renderCalendrierDispo(ratesData, apartmentId) {
 		for (let day = 1; day <= daysInMonth; day++) {
 			const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
 			const dateObj = new Date(year, month, day);
-			const rate = ratesByDate[dateStr];
+			const rate = apartmentRates[dateStr];
 
 			let cls = '';
 			let title = '';
-			let priceHtml = '';
+			let priceLabel = '–';
+			let clickable = false;
 
 			if (dateObj < today) {
 				cls = 'cal-passe';
-			} else if (!rate || Number(rate.available) === 0) {
+			} else if (!rate) {
+				cls = 'cal-inconnu';
+				title = 'Non disponible en ligne';
+			} else if (Number(rate.available) === 0) {
 				cls = 'cal-occupe';
 				title = 'Occupé';
 			} else {
 				cls = 'cal-dispo';
+				clickable = true;
 				// Estimation d'affichage jour par jour (le prix exact du séjour est recalculé côté serveur au moment du paiement)
 				const prix = rate.price ? Math.ceil(rate.price * 1.05) : null;
 				if (prix) {
-					priceHtml = `<span class="cal-prix">${prix}€</span>`;
+					priceLabel = `${prix}€`;
 					title = `${prix}€/nuit`;
 				}
 			}
 
-			html += `<div class="cal-jour ${cls}" title="${title}">${day}${priceHtml}</div>`;
+			// Un tiret est affiché à la place du prix quand il n'y en a pas, pour que toutes les cases fassent la même hauteur
+			const priceHtml = `<span class="cal-prix">${priceLabel}</span>`;
+
+			if (clickable) {
+				html += `<div class="cal-jour ${cls}" title="${title}" data-date="${dateStr}" onmouseenter="calendrierSurvolJour('${dateStr}')" onclick="calendrierClicJour('${dateStr}')">${day}${priceHtml}</div>`;
+			} else {
+				html += `<div class="cal-jour ${cls}" title="${title}">${day}${priceHtml}</div>`;
+			}
 		}
 
 		html += `</div></div>`;
@@ -1325,8 +1434,9 @@ let bookingCurrentData = null; // Résultat de availability.php
  * Ouvre le modal de réservation custom (dates + paiement Stripe)
  * @param {number|null} apartmentId - ID Smoobu de l'appartement
  * @param {string|null} title - Titre personnalisé pour le modal
+ * @param {{from: string, to: string}|null} prefillDates - Dates pré-sélectionnées (ex: depuis le calendrier), lance directement la vérification de disponibilité
  */
-function openBookingModal(apartmentId = null, title = null) {
+function openBookingModal(apartmentId = null, title = null, prefillDates = null) {
 	if (!apartmentId) return;
 
 	bookingCurrentApartmentId = apartmentId;
@@ -1343,10 +1453,14 @@ function openBookingModal(apartmentId = null, title = null) {
 	const today = new Date().toISOString().split('T')[0];
 	document.getElementById('booking-date-from').min = today;
 	document.getElementById('booking-date-to').min = today;
-	document.getElementById('booking-date-from').value = '';
-	document.getElementById('booking-date-to').value = '';
+	document.getElementById('booking-date-from').value = prefillDates?.from || '';
+	document.getElementById('booking-date-to').value = prefillDates?.to || '';
 
 	new bootstrap.Modal(document.getElementById('modal_booking')).show();
+
+	if (prefillDates) {
+		bookingVerifierDispo();
+	}
 }
 
 /**
@@ -1418,8 +1532,11 @@ async function bookingVerifierDispo() {
 			<span class="text-muted small ms-2">(${data.prix_nuit.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' })}/nuit)</span>
 		`;
 
+		document.getElementById('booking-step-dates').style.display = 'none';
 		document.getElementById('booking-step-recap').style.display = 'block';
 		document.getElementById('booking-hr-recap').style.display = 'block';
+		btnEl.disabled = false;
+		btnEl.innerHTML = '<i class="fa-solid fa-search me-2"></i>Vérifier la disponibilité';
 
 	} catch (err) {
 		dispoEl.style.display = 'block';
@@ -1434,7 +1551,8 @@ async function bookingVerifierDispo() {
  * Étape 2 : créer la session Stripe et rediriger
  */
 async function bookingProcederPaiement() {
-	const guestName = document.getElementById('booking-guest-name').value.trim();
+	const guestFirstname = document.getElementById('booking-guest-firstname').value.trim();
+	const guestLastname = document.getElementById('booking-guest-lastname').value.trim();
 	const guestEmail = document.getElementById('booking-guest-email').value.trim();
 	const guestPhone = document.getElementById('booking-guest-phone').value.trim();
 	const errorEl = document.getElementById('booking-error');
@@ -1442,9 +1560,9 @@ async function bookingProcederPaiement() {
 
 	errorEl.style.display = 'none';
 
-	if (!guestName || !guestEmail) {
+	if (!guestFirstname || !guestLastname || !guestEmail) {
 		errorEl.style.display = 'block';
-		errorEl.textContent = 'Veuillez renseigner votre nom et votre email.';
+		errorEl.textContent = 'Veuillez renseigner votre prénom, votre nom et votre email.';
 		return;
 	}
 	if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(guestEmail)) {
@@ -1471,7 +1589,8 @@ async function bookingProcederPaiement() {
 				date_from: bookingCurrentData.date_from,
 				date_to: bookingCurrentData.date_to,
 				titre: bookingCurrentTitre,
-				guest_name: guestName,
+				guest_firstname: guestFirstname,
+				guest_lastname: guestLastname,
 				guest_email: guestEmail,
 				guest_phone: guestPhone,
 			})
