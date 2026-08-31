@@ -4,8 +4,9 @@
   "minimum-stability": "stable",
   "prefer-stable": true,
   "require": {
-	"php": "^8.4",
-	"osimatic/helpers-php": "dev-master"
+    "php": "^8.4",
+    "osimatic/helpers-php": "dev-master",
+    "stripe/stripe-php": "^21.3"
   },
   "config": {
 	"optimize-autoloader": true,

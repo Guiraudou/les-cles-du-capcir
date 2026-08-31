@@ -2,8 +2,6 @@
 
 require_once __DIR__ . '/../model/config.php';
 
-use Osimatic\API\Smoobu;
-
 /**
  * API AJAX pour la gestion des biens
  */
@@ -36,8 +34,6 @@ if (empty($action) && $_SERVER['REQUEST_METHOD'] === 'POST' && empty($_POST)) {
 	]);
 	exit;
 }
-
-$smoobu = new Smoobu(SMOOBU_API_KEY);
 
 switch ($action) {
 	// Récupérer tous les biens
@@ -73,7 +69,7 @@ switch ($action) {
 		// Vérifier l'ID Smoobu si fourni
 		$idSmoobu = !empty($_POST['id_smoobu']) ? $_POST['id_smoobu'] : null;
 		if ($idSmoobu && $_POST['statut'] === 'location') {
-			if (null === ($apartment = $smoobu->getApartment((int)$idSmoobu))) {
+			if (!$bienModel->smoobuApartmentExists((int)$idSmoobu)) {
 				echo json_encode(['success' => false, 'message' => 'ID Smoobu invalide ou appartement non trouvé']);
 				break;
 			}
@@ -129,7 +125,7 @@ switch ($action) {
 		// Vérifier l'ID Smoobu si fourni
 		$idSmoobu = !empty($_POST['id_smoobu']) ? $_POST['id_smoobu'] : null;
 		if ($idSmoobu && $_POST['statut'] === 'location') {
-			if (null === ($apartment = $smoobu->getApartment((int)$idSmoobu))) {
+			if (!$bienModel->smoobuApartmentExists((int)$idSmoobu)) {
 				echo json_encode(['success' => false, 'message' => 'ID Smoobu invalide ou appartement non trouvé']);
 				break;
 			}

@@ -308,7 +308,7 @@ function createBienCard(bien, context = 'public') {
 				</div>
 				${bien.prix ? `
 					<div class="prix prix-right text-nowrap">
-						${formatPrice(bien.prix)}
+						${formatPrice(bien.prix, bien.statut)}
 					</div>
 				` : ''}
 				${bien.description ? `
@@ -1064,7 +1064,7 @@ function displayBienDetail(bien) {
 	const prixContainer = document.getElementById('modalDetailPrixContainer');
 	if (bien.prix) {
 		prixContainer.style.display = 'block';
-		document.getElementById('modalDetailPrix').textContent = formatPrice(bien.prix);
+		document.getElementById('modalDetailPrix').textContent = formatPrice(bien.prix, bien.statut);
 	} else {
 		prixContainer.style.display = 'none';
 	}
@@ -1072,8 +1072,101 @@ function displayBienDetail(bien) {
 	// Description
 	document.getElementById('modalDetailDescription').textContent = bien.description || 'Aucune description';
 
+	// Calendrier de disponibilités (locations avec id_smoobu uniquement)
+	const calContainer = document.getElementById('modalDetailCalendrierContainer');
+	const calEl = document.getElementById('modalDetailCalendrier');
+	if (bien.statut === 'location' && bien.id_smoobu) {
+		calContainer.style.display = 'block';
+		calEl.innerHTML = '<div class="text-center text-muted py-3"><div class="spinner-border spinner-border-sm me-2"></div>Chargement du calendrier...</div>';
+		fetch(`api/smoobu.php?action=rates&id=${bien.id_smoobu}`)
+			.then(r => r.json())
+			.then(data => {
+				if (!data.success) throw new Error('Erreur API');
+				calEl.innerHTML = renderCalendrierDispo(data.data, bien.id_smoobu);
+			})
+			.catch(() => {
+				calEl.innerHTML = '<p class="text-muted text-center">Impossible de charger le calendrier.</p>';
+			});
+	} else {
+		calContainer.style.display = 'none';
+	}
+
 	// Afficher la modal
 	new bootstrap.Modal(document.getElementById('modalDetailBien')).show();
+}
+
+/**
+ * Génère le HTML du calendrier de disponibilités sur 2 mois
+ */
+function renderCalendrierDispo(ratesData, apartmentId) {
+	const today = new Date();
+	today.setHours(0, 0, 0, 0);
+
+	// Indexer les tarifs par date
+	const ratesByDate = {};
+	const apartmentRates = ratesData?.data?.[apartmentId] ?? {};
+	for (const [date, info] of Object.entries(apartmentRates)) {
+		ratesByDate[date] = info;
+	}
+
+	let html = '<div class="calendrier-mois-wrapper">';
+
+	for (let m = 0; m < 2; m++) {
+		const d = new Date(today.getFullYear(), today.getMonth() + m, 1);
+		const year = d.getFullYear();
+		const month = d.getMonth();
+		const monthName = d.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
+
+		html += `<div class="calendrier-mois">`;
+		html += `<div class="calendrier-mois-titre">${monthName.charAt(0).toUpperCase() + monthName.slice(1)}</div>`;
+		html += `<div class="calendrier-grid">`;
+
+		// En-têtes jours
+		['L', 'M', 'M', 'J', 'V', 'S', 'D'].forEach(j => {
+			html += `<div class="cal-header">${j}</div>`;
+		});
+
+		// Décalage du premier jour (lundi = 0)
+		let firstDay = new Date(year, month, 1).getDay();
+		firstDay = (firstDay === 0) ? 6 : firstDay - 1;
+		for (let i = 0; i < firstDay; i++) {
+			html += `<div class="cal-vide"></div>`;
+		}
+
+		// Jours du mois
+		const daysInMonth = new Date(year, month + 1, 0).getDate();
+		for (let day = 1; day <= daysInMonth; day++) {
+			const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+			const dateObj = new Date(year, month, day);
+			const rate = ratesByDate[dateStr];
+
+			let cls = '';
+			let title = '';
+			let priceHtml = '';
+
+			if (dateObj < today) {
+				cls = 'cal-passe';
+			} else if (!rate || Number(rate.available) === 0) {
+				cls = 'cal-occupe';
+				title = 'Occupé';
+			} else {
+				cls = 'cal-dispo';
+				// Estimation d'affichage jour par jour (le prix exact du séjour est recalculé côté serveur au moment du paiement)
+				const prix = rate.price ? Math.ceil(rate.price * 1.05) : null;
+				if (prix) {
+					priceHtml = `<span class="cal-prix">${prix}€</span>`;
+					title = `${prix}€/nuit`;
+				}
+			}
+
+			html += `<div class="cal-jour ${cls}" title="${title}">${day}${priceHtml}</div>`;
+		}
+
+		html += `</div></div>`;
+	}
+
+	html += '</div>';
+	return html;
 }
 
 /**
@@ -1161,15 +1254,17 @@ function escapeHtml(text) {
 }
 
 /**
- * Formate un prix
+ * Formate un prix. Pour les locations, applique la même majoration d'affichage que le tunnel
+ * de réservation (le montant exact facturé est toujours recalculé côté serveur).
  */
-function formatPrice(price) {
+function formatPrice(price, statut = null) {
+	const finalPrice = statut === 'location' ? Math.ceil(price * 1.05) : price;
 	return new Intl.NumberFormat('fr-FR', {
 		style: 'currency',
 		currency: 'EUR',
 		minimumFractionDigits: 0,
 		maximumFractionDigits: 0
-	}).format(price);
+	}).format(finalPrice);
 }
 
 // ============================================================
@@ -1218,97 +1313,197 @@ function handleLoginForm(e) {
 }
 
 // ============================================================
-// SECTION : RÉSERVATION SMOOBU
+// SECTION : TUNNEL DE RÉSERVATION STRIPE
 // ============================================================
 
-// Variable pour stocker l'instance du script chargé
-let smoobuScriptLoaded = false;
+// État du tunnel de réservation
+let bookingCurrentApartmentId = null;
+let bookingCurrentTitre = '';
+let bookingCurrentData = null; // Résultat de availability.php
 
 /**
- * Charge le script Smoobu une seule fois
+ * Ouvre le modal de réservation custom (dates + paiement Stripe)
+ * @param {number|null} apartmentId - ID Smoobu de l'appartement
+ * @param {string|null} title - Titre personnalisé pour le modal
  */
-function loadSmoobuScript() {
-	if (smoobuScriptLoaded) {
-		return Promise.resolve();
-	}
+function openBookingModal(apartmentId = null, title = null) {
+	if (!apartmentId) return;
 
-	return new Promise((resolve, reject) => {
-		const script = document.createElement('script');
-		script.src = 'https://login.smoobu.com/js/Settings/BookingToolIframe.js';
-		script.onload = () => {
-			smoobuScriptLoaded = true;
-			resolve();
-		};
-		script.onerror = reject;
-		document.head.appendChild(script);
-	});
+	bookingCurrentApartmentId = apartmentId;
+	bookingCurrentTitre = title || 'Séjour Les Clés du Capcir';
+	bookingCurrentData = null;
+
+	// Titre du modal
+	document.getElementById('modal_booking_label').textContent = title ? `Réserver — ${title}` : 'Réserver votre séjour';
+
+	// Remettre à zéro le formulaire
+	bookingReset();
+
+	// Date minimale = aujourd'hui
+	const today = new Date().toISOString().split('T')[0];
+	document.getElementById('booking-date-from').min = today;
+	document.getElementById('booking-date-to').min = today;
+	document.getElementById('booking-date-from').value = '';
+	document.getElementById('booking-date-to').value = '';
+
+	new bootstrap.Modal(document.getElementById('modal_booking')).show();
 }
 
 /**
- * Ouvre le modal de réservation avec l'iframe Smoobu
- * @param {number|null} apartmentId - ID Smoobu de l'appartement (null pour tous les biens)
- * @param {string|null} title - Titre personnalisé pour le modal
- * @param {boolean} skipShow - Si true, ne pas ouvrir le modal (déjà ouvert)
+ * Remet le tunnel à l'étape 1
  */
-function openBookingModal(apartmentId = null, title = null, skipShow = false) {
-	const modal = document.getElementById('modal_booking');
-	const modalTitle = document.getElementById('modal_booking_label');
-	const container = document.getElementById('booking-iframe-container');
+function bookingReset() {
+	document.getElementById('booking-step-dates').style.display = 'block';
+	document.getElementById('booking-step-recap').style.display = 'none';
+	document.getElementById('booking-hr-recap').style.display = 'none';
+	document.getElementById('booking-dispo-result').style.display = 'none';
+	document.getElementById('booking-error').style.display = 'none';
+	document.getElementById('booking-btn-verifier').disabled = false;
+	document.getElementById('booking-btn-verifier').innerHTML = '<i class="fa-solid fa-search me-2"></i>Vérifier la disponibilité';
+}
 
-	if (!modal || !container) {
+/**
+ * Étape 1 : vérifier la disponibilité et calculer le prix majoré
+ */
+async function bookingVerifierDispo() {
+	const dateFrom = document.getElementById('booking-date-from').value;
+	const dateTo = document.getElementById('booking-date-to').value;
+	const dispoEl = document.getElementById('booking-dispo-result');
+	const btnEl = document.getElementById('booking-btn-verifier');
+
+	if (!dateFrom || !dateTo) {
+		dispoEl.style.display = 'block';
+		dispoEl.className = 'alert alert-warning mb-3';
+		dispoEl.textContent = 'Veuillez sélectionner une date d\'arrivée et de départ.';
+		return;
+	}
+	if (dateFrom >= dateTo) {
+		dispoEl.style.display = 'block';
+		dispoEl.className = 'alert alert-warning mb-3';
+		dispoEl.textContent = 'La date de départ doit être après la date d\'arrivée.';
 		return;
 	}
 
-	title = title !== '' ? title : null;
-	apartmentId = apartmentId !== 0 ? apartmentId : null;
+	// Loader
+	btnEl.disabled = true;
+	btnEl.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Vérification en cours...';
+	dispoEl.style.display = 'none';
 
-	// Mise à jour du titre
-	if (title) {
-		modalTitle.textContent = title;
-	} else {
-		modalTitle.textContent = apartmentId ? 'Réserver ce bien' : 'Réserver votre séjour';
-	}
+	try {
+		const res = await fetch(`api/availability.php?apartment_id=${bookingCurrentApartmentId}&date_from=${dateFrom}&date_to=${dateTo}`);
+		const data = await res.json();
 
-	// Générer un ID unique pour le container iframe
-	const iframeId = apartmentId ? `apartmentIframe${apartmentId}` : 'apartmentIframeAll';
-	const accountId = SMOOBU_ACCOUNT_ID;
-	const iframeUrl = apartmentId
-		? `https://login.smoobu.com/fr/booking-tool/iframe/${accountId}/${apartmentId}`
-		: `https://login.smoobu.com/fr/booking-tool/iframe/${accountId}`;
+		if (!data.success) throw new Error(data.error || 'Erreur serveur');
 
-	// Afficher un loader pendant le chargement
-	container.innerHTML = `
-		<div class="text-center py-5">
-			<div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
-				<span class="visually-hidden">Chargement...</span>
-			</div>
-			<p class="mt-3 text-muted">Chargement du système de réservation...</p>
-		</div>
-	`;
-
-	// Charger et initialiser l'iframe Smoobu
-	loadSmoobuScript().then(() => {
-		if (typeof BookingToolIframe !== 'undefined') {
-			// Créer le container de l'iframe
-			container.innerHTML = `<div id="${iframeId}"></div>`;
-
-			BookingToolIframe.initialize({
-				url: iframeUrl,
-				baseUrl: 'https://login.smoobu.com',
-				target: `#${iframeId}`
-			});
+		if (!data.available) {
+			dispoEl.style.display = 'block';
+			dispoEl.className = 'alert alert-danger mb-3';
+			dispoEl.innerHTML = '<i class="fa-solid fa-circle-xmark me-2"></i>Ce bien n\'est pas disponible pour ces dates.';
+			btnEl.disabled = false;
+			btnEl.innerHTML = '<i class="fa-solid fa-search me-2"></i>Vérifier la disponibilité';
+			return;
 		}
-	}).catch(error => {
-		console.error('Erreur lors du chargement du script Smoobu:', error);
-		container.innerHTML = '<div class="alert alert-danger m-3">Erreur lors du chargement du système de réservation.</div>';
-	});
 
-	// Ouvrir le modal seulement si pas déjà ouvert
-	if (!skipShow) {
-		const bsModal = new bootstrap.Modal(modal);
-		bsModal.show();
+		// Disponible — on passe à l'étape 2
+		bookingCurrentData = data;
+
+		const dateFromFr = new Date(dateFrom + 'T12:00:00').toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' });
+		const dateToFr = new Date(dateTo + 'T12:00:00').toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' });
+
+		document.getElementById('booking-recap-details').innerHTML = `
+			<i class="fa-solid fa-circle-check me-2"></i>
+			<strong>${bookingCurrentTitre}</strong><br>
+			<span class="small">Du <strong>${dateFromFr}</strong> au <strong>${dateToFr}</strong> · ${data.nights} nuit${data.nights > 1 ? 's' : ''}</span><br>
+			<span class="fs-5 fw-bold mt-1 d-inline-block">${data.prix_majore.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' })} au total</span>
+			<span class="text-muted small ms-2">(${data.prix_nuit.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' })}/nuit)</span>
+		`;
+
+		document.getElementById('booking-step-recap').style.display = 'block';
+		document.getElementById('booking-hr-recap').style.display = 'block';
+
+	} catch (err) {
+		dispoEl.style.display = 'block';
+		dispoEl.className = 'alert alert-danger mb-3';
+		dispoEl.textContent = 'Erreur lors de la vérification : ' + err.message;
+		btnEl.disabled = false;
+		btnEl.innerHTML = '<i class="fa-solid fa-search me-2"></i>Vérifier la disponibilité';
 	}
 }
+
+/**
+ * Étape 2 : créer la session Stripe et rediriger
+ */
+async function bookingProcederPaiement() {
+	const guestName = document.getElementById('booking-guest-name').value.trim();
+	const guestEmail = document.getElementById('booking-guest-email').value.trim();
+	const guestPhone = document.getElementById('booking-guest-phone').value.trim();
+	const errorEl = document.getElementById('booking-error');
+	const btnEl = document.getElementById('booking-btn-payer');
+
+	errorEl.style.display = 'none';
+
+	if (!guestName || !guestEmail) {
+		errorEl.style.display = 'block';
+		errorEl.textContent = 'Veuillez renseigner votre nom et votre email.';
+		return;
+	}
+	if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(guestEmail)) {
+		errorEl.style.display = 'block';
+		errorEl.textContent = 'Adresse email invalide.';
+		return;
+	}
+	if (!bookingCurrentData) {
+		errorEl.style.display = 'block';
+		errorEl.textContent = 'Erreur : veuillez recommencer depuis les dates.';
+		return;
+	}
+
+	btnEl.disabled = true;
+	btnEl.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Redirection vers le paiement...';
+
+	try {
+		// Le prix n'est pas envoyé : il est recalculé côté serveur à partir des dates et de l'appartement
+		const res = await fetch('api/payment.php', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({
+				apartment_id: bookingCurrentApartmentId,
+				date_from: bookingCurrentData.date_from,
+				date_to: bookingCurrentData.date_to,
+				titre: bookingCurrentTitre,
+				guest_name: guestName,
+				guest_email: guestEmail,
+				guest_phone: guestPhone,
+			})
+		});
+		const data = await res.json();
+
+		if (!data.success) throw new Error(data.error || 'Erreur serveur');
+
+		// Redirection vers Stripe Checkout
+		window.location.href = data.url;
+
+	} catch (err) {
+		errorEl.style.display = 'block';
+		errorEl.textContent = 'Erreur lors de la création du paiement : ' + err.message;
+		btnEl.disabled = false;
+		btnEl.innerHTML = '<i class="fa-solid fa-lock me-2"></i>Procéder au paiement sécurisé';
+	}
+}
+
+// Mise à jour de la date de départ min quand l'arrivée change
+document.addEventListener('DOMContentLoaded', function() {
+	const dateFrom = document.getElementById('booking-date-from');
+	const dateTo = document.getElementById('booking-date-to');
+	if (dateFrom && dateTo) {
+		dateFrom.addEventListener('change', function() {
+			dateTo.min = this.value;
+			if (dateTo.value && dateTo.value <= this.value) {
+				dateTo.value = '';
+			}
+		});
+	}
+});
 
 // ============================================================
 // SECTION : INITIALISATION
@@ -1322,16 +1517,6 @@ document.addEventListener('DOMContentLoaded', function() {
 		loadIndexBiens();
 	}
 
-	// Gérer l'ouverture du modal de réservation
-	const bookingModal = document.getElementById('modal_booking');
-	if (bookingModal) {
-		bookingModal.addEventListener('show.bs.modal', function(event) {
-			const container = document.getElementById('booking-iframe-container');
-			if (container && !container.hasChildNodes()) {
-				openBookingModal(null, null, true);
-			}
-		});
-	}
 	// Formulaire de contact (page publique)
 	const contactForm = document.getElementById('contactForm');
 	if (contactForm) {

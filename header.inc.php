@@ -84,7 +84,7 @@ $isIndex = ($currentPage === 'index.php');
 					<li class="nav-item"><a class="nav-link" href="tarif.php">Tarifs</a></li>
 					<li class="nav-item"><a class="nav-link" href="index.php#contact">Contact</a></li>
 					<li class="nav-item ms-lg-2">
-						<a class="btn btn-sapin" href="#" data-bs-toggle="modal" data-bs-target="#modal_booking">Réserver</a>
+						<a class="btn btn-sapin" href="location.php">Réserver</a>
 					</li>
 				</ul>
 			</div>

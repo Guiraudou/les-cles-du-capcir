@@ -94,8 +94,6 @@
 	// Chemin des uploads (depuis config.php)
 	const UPLOADS_PATH = "<?= UPLOADS_PATH ?>";
 
-	const SMOOBU_ACCOUNT_ID = '<?= SMOOBU_ACCOUNT_ID ?>';
-
 	const MAX_IMAGES_UPLOAD = <?= MAX_IMAGES_UPLOAD ?>;
 
 	const IS_ADMIN_LOGGED_IN = <?= isset($_SESSION['admin_id']) ? 'true' : 'false' ?>;

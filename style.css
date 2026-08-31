@@ -1150,3 +1150,92 @@ footer .border-top{
 	padding: .25rem .5rem;
 	font-size: .875rem;
 }
+
+/* ===== CALENDRIER DISPONIBILITÉS ===== */
+.calendrier-mois-wrapper {
+	display: flex;
+	gap: 1.5rem;
+	flex-wrap: wrap;
+}
+.calendrier-mois {
+	flex: 1;
+	min-width: 280px;
+}
+.calendrier-mois-titre {
+	text-align: center;
+	font-weight: 600;
+	color: var(--color-sapin);
+	margin-bottom: .75rem;
+	font-size: .95rem;
+}
+.calendrier-grid {
+	display: grid;
+	grid-template-columns: repeat(7, 1fr);
+	gap: 3px;
+}
+.cal-header {
+	text-align: center;
+	font-size: .7rem;
+	font-weight: 700;
+	color: #999;
+	padding: 4px 0;
+}
+.cal-vide { background: transparent; }
+.cal-jour {
+	position: relative;
+	text-align: center;
+	border-radius: 6px;
+	padding: 4px 2px 2px;
+	font-size: .78rem;
+	font-weight: 500;
+	min-height: 38px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: flex-start;
+	cursor: default;
+}
+.cal-passe {
+	color: #ccc;
+	background: #f8f8f8;
+}
+.cal-dispo {
+	background: #e8f5e9;
+	color: #2e7d32;
+	border: 1px solid #c8e6c9;
+}
+.cal-dispo:hover {
+	background: #c8e6c9;
+}
+.cal-occupe {
+	background: #ffebee;
+	color: #c62828;
+	border: 1px solid #ffcdd2;
+}
+.cal-prix {
+	font-size: .62rem;
+	font-weight: 600;
+	color: var(--color-sapin);
+	margin-top: 1px;
+	line-height: 1;
+}
+.calendrier-legende {
+	display: flex;
+	gap: 1rem;
+	font-size: .8rem;
+	color: #666;
+}
+.legende-item {
+	display: flex;
+	align-items: center;
+	gap: 5px;
+}
+.legende-dot {
+	width: 12px;
+	height: 12px;
+	border-radius: 3px;
+	display: inline-block;
+}
+.legende-dot.dispo  { background: #e8f5e9; border: 1px solid #c8e6c9; }
+.legende-dot.occupe { background: #ffebee; border: 1px solid #ffcdd2; }
+.legende-dot.passe  { background: #f8f8f8; border: 1px solid #eee; }

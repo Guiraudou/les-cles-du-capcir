@@ -62,85 +62,25 @@ if (!empty($_POST['honeypot'])) {
 $to = EMAIL_DESTINATAIRE;
 $subject = 'Nouveau message de contact - ' . $sujet;
 
-// Corps de l'email en HTML
-$emailBody = '
-<!DOCTYPE html>
-<html>
-<head>
-	<meta charset="utf-8">
-	<style>
-		body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-		.container { max-width: 600px; margin: 0 auto; padding: 20px; }
-		.header { background: #2d5016; color: white; padding: 20px; text-align: center; }
-		.content { background: #f8f9fa; padding: 20px; margin: 20px 0; }
-		.field { margin-bottom: 15px; }
-		.label { font-weight: bold; color: #2d5016; }
-		.value { margin-top: 5px; }
-		.footer { text-align: center; color: #666; font-size: 12px; margin-top: 20px; }
-	</style>
-</head>
-<body>
-	<div class="container">
-		<div class="header">
-			<h2>Nouveau message de contact</h2>
-			<p>' . SITE_NAME . '</p>
-		</div>
-		<div class="content">
-			<div class="field">
-				<div class="label">Nom :</div>
-				<div class="value">' . htmlspecialchars($nom) . '</div>
-			</div>
-			' . (!empty($email) ? '
-			<div class="field">
-				<div class="label">Email :</div>
-				<div class="value"><a href="mailto:' . htmlspecialchars($email) . '">' . htmlspecialchars($email) . '</a></div>
-			</div>
-			' : '') . '
-			' . (!empty($telephone) ? '
-			<div class="field">
-				<div class="label">Téléphone :</div>
-				<div class="value">' . htmlspecialchars($telephone) . '</div>
-			</div>
-			' : '') . '
-			<div class="field">
-				<div class="label">Sujet :</div>
-				<div class="value">' . htmlspecialchars($sujet) . '</div>
-			</div>
-			<div class="field">
-				<div class="label">Message :</div>
-				<div class="value">' . nl2br(htmlspecialchars($message)) . '</div>
-			</div>
-		</div>
-		<div class="footer">
-			<p>Message envoyé depuis le formulaire de contact du site ' . SITE_NAME . '</p>
-			<p>Date : ' . date('d/m/Y à H:i') . '</p>
-		</div>
-	</div>
-</body>
-</html>
-';
-
-// Encoder le nom de l'expéditeur (RFC 2047) pour accepter les caractères non-ASCII
-$fromName = '=?UTF-8?B?' . base64_encode(SITE_NAME) . '?=';
-
-// En-têtes de l'email
-// From: adresse du domaine pour passer DMARC ; le visiteur est en Reply-To
-$headers = [
-	'MIME-Version: 1.0',
-	'Content-Type: text/html; charset=UTF-8',
-	'From: ' . $fromName . ' <' . SENDER_EMAIL . '>',
-	'Cc: benoit.guiraudou@gmail.com',
-	'X-Mailer: PHP/' . PHP_VERSION
-];
-
-// Reply-To uniquement si le visiteur a renseigné un email
+// Corps de l'email en HTML (gabarit commun model/email/header.inc.php + footer.inc.php)
+$bodyHtml = Mailer::field('Nom', $nom);
 if (!empty($email)) {
-	$replyToName = '=?UTF-8?B?' . base64_encode($nom) . '?=';
-	$headers[] = 'Reply-To: ' . $replyToName . ' <' . $email . '>';
+	$bodyHtml .= Mailer::field('Email', '<a href="mailto:' . htmlspecialchars($email) . '">' . htmlspecialchars($email) . '</a>', true);
 }
+if (!empty($telephone)) {
+	$bodyHtml .= Mailer::field('Téléphone', $telephone);
+}
+$bodyHtml .= Mailer::field('Sujet', $sujet);
+$bodyHtml .= Mailer::field('Message', $message);
 
-// Envoi de l'email (-f définit le Return-Path/envelope sender pour SPF)
-$emailSent = mail($to, $subject, $emailBody, implode("\r\n", $headers), '-f' . SENDER_EMAIL);
+$emailBody = Mailer::renderTemplate(
+	'Nouveau message de contact',
+	$bodyHtml,
+	'Message envoyé depuis le formulaire de contact du site ' . SITE_NAME
+);
+
+// Reply-To uniquement si le visiteur a renseigné un email ; copie systématique au propriétaire
+$emailSent = Mailer::send($to, $subject, $emailBody, $email ?: null, $nom, ['benoit.guiraudou@gmail.com']);
 
 if (!$emailSent) {
 	http_response_code(500);

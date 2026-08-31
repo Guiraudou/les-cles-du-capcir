@@ -67,6 +67,22 @@
 					<h6 class="text-muted mb-2">Description</h6>
 					<p id="modalDetailDescription" style="white-space: pre-wrap;"></p>
 				</div>
+
+				<!-- Calendrier de disponibilités (location uniquement) -->
+				<div id="modalDetailCalendrierContainer" style="display:none;" class="mt-4">
+					<h6 class="text-muted mb-3"><i class="fa-solid fa-calendar-days me-2"></i>Disponibilités</h6>
+					<div id="modalDetailCalendrier" class="calendrier-dispo">
+						<div class="text-center text-muted py-3">
+							<div class="spinner-border spinner-border-sm me-2"></div>
+							Chargement du calendrier...
+						</div>
+					</div>
+					<div class="calendrier-legende mt-2">
+						<span class="legende-item"><span class="legende-dot dispo"></span> Disponible</span>
+						<span class="legende-item"><span class="legende-dot occupe"></span> Occupé</span>
+						<span class="legende-item"><span class="legende-dot passe"></span> Passé</span>
+					</div>
+				</div>
 			</div>
 			<div class="modal-footer">
 				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>

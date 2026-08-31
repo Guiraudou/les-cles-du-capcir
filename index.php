@@ -24,7 +24,7 @@ $meta_description = 'Les Clés du Capcir : vente immobilière et conciergerie lo
 				<a class="nav-link" href="vente.php">Vente</a>
 				<a class="nav-link" href="tarif.php">Tarifs</a>
 				<a class="nav-link" href="#contact">Contact</a>
-				<a class="btn-ghost" href="#" data-bs-toggle="modal" data-bs-target="#modal_booking">Réserver</a>
+				<a class="btn-ghost" href="location.php">Réserver</a>
 			</div>
 
 			<!-- mobile toggle hamburger -->
@@ -42,7 +42,7 @@ $meta_description = 'Les Clés du Capcir : vente immobilière et conciergerie lo
 					<li class="nav-item"><a class="nav-link" href="#biens">Biens</a></li>
 					<li class="nav-item"><a class="nav-link" href="#contact">Contact</a></li>
 					<li class="nav-item mt-2">
-						<a class="btn-ghost" href="#" data-bs-toggle="modal" data-bs-target="#modal_booking">Réserver</a>
+						<a class="btn-ghost" href="location.php">Réserver</a>
 					</li>
 				</ul>
 			</div>
@@ -60,7 +60,7 @@ $meta_description = 'Les Clés du Capcir : vente immobilière et conciergerie lo
 					Au cœur du Capcir
 				</h1>
 				<div class="d-flex flex-wrap gap-3 align-items-center pt-3">
-					<a href="#" data-bs-toggle="modal" data-bs-target="#modal_booking" class="btn btn-sapin">Réserver maintenant</a>
+					<a href="location.php" class="btn btn-sapin">Réserver maintenant</a>
 					<a href="vente.php" class="btn btn-outline-sapin">Biens en vente</a>
 					<a href="#contact" class="btn btn-link-sapin btn-contact-arrow">
 						Nous contacter →

@@ -13,6 +13,8 @@ require_once dirname(__DIR__).'/vendor/autoload.php';
 
 require_once __DIR__ . '/../model/User.php';
 require_once __DIR__ . '/../model/Bien.php';
+require_once __DIR__ . '/../model/Booking.php';
+require_once __DIR__ . '/../model/Mailer.php';
 
 // Init secrets
 $secrets = parse_ini_file(__DIR__ . '/secrets.ini', true);
@@ -38,7 +40,16 @@ define('MAX_IMAGES_UPLOAD', 10); // Nombre maximum d'images par bien
 
 // Configuration Smoobu
 define('SMOOBU_API_KEY', $secrets['smoobu']['api_key']);
+define('SMOOBU_API_SECRET', $secrets['smoobu']['api_secret']);
 define('SMOOBU_ACCOUNT_ID', $secrets['smoobu']['account_id']);
+define('SMOOBU_CHANNEL_ID_DIRECT', 1852); // Canal "Direct" Smoobu, utilisé pour les réservations créées depuis le site
+
+// Configuration Stripe
+define('STRIPE_SECRET_KEY', $secrets['stripe']['secret_key']);
+define('STRIPE_WEBHOOK_SECRET', $secrets['stripe']['webhook_secret']);
+
+// Tunnel de réservation en ligne
+define('BOOKING_MARKUP_RATE', 0.05); // Majoration appliquée au tarif Smoobu pour le paiement en ligne (+5%)
 
 // Autres paramètres
 define('TIMEZONE', 'Europe/Paris');

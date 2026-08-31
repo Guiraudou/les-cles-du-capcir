@@ -358,6 +358,123 @@ class Bien
 	}
 
 	/**
+	 * Vérifie qu'un appartement Smoobu existe
+	 */
+	public function smoobuApartmentExists(int $idSmoobu): bool
+	{
+		return Booking::getSmoobuClient()->getApartment($idSmoobu) !== null;
+	}
+
+	/**
+	 * Synchronise les biens locaux avec les appartements Smoobu : sauvegarde biens.json,
+	 * puis crée ou met à jour chaque bien correspondant à un appartement Smoobu.
+	 * @return array{stats: array{added: int, updated: int, skipped: int, errors: string[]}, total_smoobu: int}
+	 * @throws Exception Si les appartements Smoobu ne peuvent pas être récupérés
+	 */
+	public function synchronizeFromSmoobu(): array
+	{
+		$this->backup();
+
+		$smoobu = Booking::getSmoobuClient();
+		$apartments = $smoobu->getApartments();
+
+		if ($apartments === null) {
+			throw new Exception('Impossible de récupérer les appartements depuis Smoobu. Vérifiez votre clé API et secret HMAC.');
+		}
+
+		$apartments = $apartments['apartments'] ?? [];
+
+		// Filtrer uniquement les appartements (pas les groupes)
+		$apartments = array_filter($apartments, fn($apartmentDetails) => isset($apartmentDetails['id']) && !empty($apartmentDetails['name']));
+
+		// Indexer les biens existants par id_smoobu pour comparaison rapide
+		$biensBySmoobuId = [];
+		foreach ($this->getAll(null, false) as $bien) {
+			if (!empty($bien['id_smoobu'])) {
+				$biensBySmoobuId[$bien['id_smoobu']] = $bien;
+			}
+		}
+
+		$stats = [
+			'added' => 0,
+			'updated' => 0,
+			'skipped' => 0,
+			'errors' => []
+		];
+
+		foreach ($apartments as $apartment) {
+			$idSmoobu = $apartment['id'];
+
+			try {
+				// Récupérer les détails complets de l'appartement
+				$apartmentDetails = $smoobu->getApartment($idSmoobu);
+
+				if ($apartmentDetails === null) {
+					throw new Exception('Impossible de récupérer les détails');
+				}
+
+				// Adresse complète
+				$postalAddress = \Osimatic\Location\PostalAddress::formatFromComponents(
+					countryCode: 'FR',
+					city: $apartmentDetails['city'],
+					postcode: $apartmentDetails['zip'],
+					road: $apartmentDetails['street'],
+				);
+
+				// Vérifier si le bien existe déjà
+				if (isset($biensBySmoobuId[$idSmoobu])) {
+					// Mise à jour
+					$existingBien = $biensBySmoobuId[$idSmoobu];
+
+					$updateData = array_merge($existingBien, [
+						'statut' => 'location',
+						'titre' => $apartmentDetails['name'] ?? '',
+						'city' => $apartmentDetails['location']['city'] ?? null,
+						'lieu' => $postalAddress,
+						'nb_chambres' => $apartmentDetails['rooms']['bedrooms'] ?? null,
+						'nb_personnes' => $apartmentDetails['rooms']['maxOccupancy'] ?? null,
+						'prix' => $apartmentDetails['price']['minimal'] ?? null,
+						'type' => $apartmentDetails['type'] ?? null,
+						'id_smoobu' => $idSmoobu
+					]);
+
+					$this->update($existingBien['id'], $updateData);
+					$stats['updated']++;
+				}
+				else {
+					// Création
+					$createData = [
+						'statut' => 'location',
+						'titre' => $apartmentDetails['name'] ?? '',
+						'description' => $apartmentDetails['description'] ?? '',
+						'city' => $apartmentDetails['location']['city'] ?? null,
+						'lieu' => $postalAddress,
+						'surface' => $apartmentDetails['size'] ?? null,
+						'nb_chambres' => $apartmentDetails['rooms']['bedrooms'] ?? null,
+						'nb_personnes' => $apartmentDetails['rooms']['maxOccupancy'] ?? null,
+						'prix' => $apartmentDetails['price']['minimal'] ?? null,
+						'type' => $apartmentDetails['type'] ?? null,
+						'ordre' => 0,
+						'id_smoobu' => $idSmoobu
+					];
+
+					$this->create($createData);
+					$stats['added']++;
+				}
+			}
+			catch (Exception $e) {
+				$stats['errors'][] = "Appartement {$apartment['name']} (ID: {$idSmoobu}): " . $e->getMessage();
+				$stats['skipped']++;
+			}
+		}
+
+		return [
+			'stats' => $stats,
+			'total_smoobu' => count($apartments),
+		];
+	}
+
+	/**
 	 * Crée une sauvegarde de biens.json
 	 */
 	public function backup(): string
