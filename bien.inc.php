@@ -71,19 +71,9 @@
 				<!-- Calendrier de disponibilités (location uniquement) -->
 				<div id="modalDetailCalendrierContainer" style="display:none;" class="mt-4">
 					<h6 class="text-muted mb-3"><i class="fa-solid fa-calendar-days me-2"></i>Disponibilités</h6>
-					<div id="modalDetailCalendrier" class="calendrier-dispo">
-						<div class="text-center text-muted py-3">
-							<div class="spinner-border spinner-border-sm me-2"></div>
-							Chargement du calendrier...
-						</div>
+					<div id="modalDetailCalendrierBloc">
+						<?php include 'calendrier-dispo.inc.php'; ?>
 					</div>
-					<div class="calendrier-legende mt-2">
-						<span class="legende-item"><span class="legende-dot dispo"></span> Disponible</span>
-						<span class="legende-item"><span class="legende-dot occupe"></span> Occupé</span>
-						<span class="legende-item"><span class="legende-dot passe"></span> Passé</span>
-						<span class="legende-item"><span class="legende-dot inconnu"></span> Non disponible en ligne</span>
-					</div>
-					<p class="text-muted small mt-2 mb-0">Cliquez sur une date d'arrivée puis une date de départ pour réserver directement.</p>
 				</div>
 			</div>
 			<div class="modal-footer">

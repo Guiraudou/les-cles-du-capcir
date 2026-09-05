@@ -11,28 +11,31 @@
 				<!-- Étape 1 : Sélection des dates -->
 				<div id="booking-step-dates">
 					<h6 class="text-muted mb-3"><i class="fa-solid fa-calendar me-2"></i>Choisissez vos dates</h6>
-					<div class="row g-3 mb-3">
-						<div class="col-6">
-							<label class="form-label fw-semibold">Arrivée</label>
-							<input type="date" id="booking-date-from" class="form-control" min="">
-						</div>
-						<div class="col-6">
-							<label class="form-label fw-semibold">Départ</label>
-							<input type="date" id="booking-date-to" class="form-control" min="">
-						</div>
+					<div id="booking-calendrier-bloc" class="mb-2">
+						<?php include 'calendrier-dispo.inc.php'; ?>
 					</div>
-					<div id="booking-dispo-result" class="mb-3" style="display:none;"></div>
-					<button id="booking-btn-verifier" class="btn btn-sapin w-100" onclick="bookingVerifierDispo()">
-						<i class="fa-solid fa-search me-2"></i>Vérifier la disponibilité
-					</button>
+					<div id="booking-dispo-result" class="alert mb-3 mt-2" style="display:none;">
+						<div class="mb-1">
+							<i class="fa-solid fa-circle-check me-2 text-success"></i>
+							Arrivée le <strong id="booking-dispo-date-from"></strong> — Départ le <strong id="booking-dispo-date-to"></strong>
+						</div>
+						<div id="booking-dispo-status"></div>
+					</div>
 				</div>
-
-				<hr id="booking-hr-recap" style="display:none;">
 
 				<!-- Étape 2 : Récapitulatif + infos locataire -->
 				<div id="booking-step-recap" style="display:none;">
 					<h6 class="text-muted mb-3"><i class="fa-solid fa-receipt me-2"></i>Récapitulatif</h6>
-					<div id="booking-recap-details" class="alert alert-success mb-4"></div>
+					<div id="booking-recap-details" class="alert alert-success mb-2">
+						<i class="fa-solid fa-circle-check me-2"></i>
+						<strong id="booking-recap-titre"></strong><br>
+						<span class="small">Du <strong id="booking-recap-date-from"></strong> au <strong id="booking-recap-date-to"></strong> · <span id="booking-recap-nuits"></span></span><br>
+						<span class="fs-5 fw-bold mt-1 d-inline-block" id="booking-recap-prix-total"></span>
+						<span class="text-muted small ms-2" id="booking-recap-prix-nuit"></span>
+					</div>
+					<p class="text-end mb-4">
+						<a href="#" class="small" onclick="bookingModifierDates(); return false;"><i class="fa-solid fa-pen me-1"></i>Modifier les dates</a>
+					</p>
 
 					<h6 class="text-muted mb-3"><i class="fa-solid fa-user me-2"></i>Vos coordonnées</h6>
 					<div class="row g-3 mb-4">
