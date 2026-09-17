@@ -443,8 +443,8 @@ class Booking
 			$processedSessions[] = $session->id;
 			$sessionsDb->write(self::PROCESSED_SESSIONS_FILENAME, $processedSessions);
 
-			// Marquer le solde comme envoyé dans pending_balances
-			self::markBalanceAsPaid($session->id, $soldePaye);
+			// Marquer le solde comme payé dans pending_balances
+			self::markBalanceAsPaid($reservationId, $soldePaye);
 
 			// Message au locataire via Smoobu
 			if ($reservationId > 0) {
@@ -500,12 +500,12 @@ class Booking
 		$db->write(self::PENDING_BALANCES_FILENAME, $pending);
 	}
 
-	private static function markBalanceAsPaid(string $stripeSessionId, float $soldePaye): void
+	private static function markBalanceAsPaid(int $reservationId, float $soldePaye): void
 	{
 		$db      = JsonDB::getInstance();
 		$pending = $db->read(self::PENDING_BALANCES_FILENAME) ?: [];
 		foreach ($pending as &$entry) {
-			if (($entry['stripe_session'] ?? '') === $stripeSessionId || !($entry['sent'] ?? false)) {
+			if ((int) ($entry['reservation_id'] ?? 0) === $reservationId) {
 				$entry['solde_paid']    = true;
 				$entry['solde_paid_on'] = date('Y-m-d');
 				$entry['solde_paye']    = $soldePaye;

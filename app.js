@@ -1230,6 +1230,30 @@ function calendrierClicJour(dateStr) {
 }
 
 /**
+ * Détecte si une date est un jour de check-out (départ) :
+ * le jour J est occupé (available=0) mais le jour J-1 était occupé aussi
+ * et le jour J+1 est libre → c'est la fin d'une réservation, le jour est réservable en arrivée.
+ */
+function isCheckoutDay(dateStr, apartmentRates) {
+	const prev = new Date(dateStr);
+	prev.setDate(prev.getDate() - 1);
+	const prevStr = formatDateYMD(prev);
+
+	const next = new Date(dateStr);
+	next.setDate(next.getDate() + 1);
+	const nextStr = formatDateYMD(next);
+
+	const prevRate = apartmentRates[prevStr];
+	const nextRate = apartmentRates[nextStr];
+
+	// Jour de départ = la veille était occupée ET le lendemain est libre (ou absent)
+	const prevOccupied = prevRate && Number(prevRate.available) === 0;
+	const nextFree     = !nextRate || Number(nextRate.available) === 1;
+
+	return prevOccupied && nextFree;
+}
+
+/**
  * Génère le HTML du calendrier de disponibilités sur 2 mois à partir de baseDate
  * (les flèches de navigation et le bandeau de sélection sont statiques, hors de ce rendu)
  */
@@ -1280,7 +1304,7 @@ function renderCalendrierDispo(ratesData, apartmentId, baseDate) {
 			} else if (!rate) {
 				cls = 'cal-inconnu';
 				title = 'Non disponible en ligne';
-			} else if (Number(rate.available) === 0) {
+			} else if (Number(rate.available) === 0 && !isCheckoutDay(dateStr, apartmentRates)) {
 				cls = 'cal-occupe';
 				title = 'Occupé';
 			} else {
