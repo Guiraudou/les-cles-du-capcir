@@ -49,7 +49,9 @@ define('STRIPE_SECRET_KEY', $secrets['stripe']['secret_key']);
 define('STRIPE_WEBHOOK_SECRET', $secrets['stripe']['webhook_secret']);
 
 // Tunnel de réservation en ligne
-define('BOOKING_MARKUP_RATE', 0.05); // Majoration appliquée au tarif Smoobu pour le paiement en ligne (+5%)
+define('BOOKING_MARKUP_RATE',  0.05); // Majoration appliquée au tarif Smoobu pour le paiement en ligne (+5%)
+define('BOOKING_DEPOSIT_RATE', 0.30); // Taux d'acompte à l'encaissement (30% du total)
+define('CRON_SECRET', $secrets['cron']['secret'] ?? ''); // Token de sécurité pour appel web du CRON
 
 // Autres paramètres
 define('TIMEZONE', 'Europe/Paris');
