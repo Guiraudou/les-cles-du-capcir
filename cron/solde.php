@@ -45,3 +45,4 @@ try {
 
 $duration = round(microtime(true) - $start, 2);
 echo '[' . date('Y-m-d H:i:s') . '] Terminé en ' . $duration . 's' . PHP_EOL;
+
