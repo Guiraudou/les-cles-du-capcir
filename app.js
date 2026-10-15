@@ -1603,6 +1603,7 @@ async function bookingProcederPaiement() {
 	const guestLastname = document.getElementById('booking-guest-lastname').value.trim();
 	const guestEmail = document.getElementById('booking-guest-email').value.trim();
 	const guestPhone = document.getElementById('booking-guest-phone').value.trim();
+	const guestCountry = document.getElementById('booking-guest-country').value.trim();
 	const errorEl = document.getElementById('booking-error');
 	const btnEl = document.getElementById('booking-btn-payer');
 
@@ -1611,6 +1612,11 @@ async function bookingProcederPaiement() {
 	if (!guestFirstname || !guestLastname || !guestEmail) {
 		errorEl.style.display = 'block';
 		errorEl.textContent = 'Veuillez renseigner votre prénom, votre nom et votre email.';
+		return;
+	}
+	if (!guestCountry) {
+		errorEl.style.display = 'block';
+		errorEl.textContent = 'Veuillez sélectionner votre pays.';
 		return;
 	}
 	if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(guestEmail)) {
@@ -1641,6 +1647,7 @@ async function bookingProcederPaiement() {
 				guest_lastname: guestLastname,
 				guest_email: guestEmail,
 				guest_phone: guestPhone,
+				guest_country: guestCountry,
 			})
 		});
 		const data = await res.json();
