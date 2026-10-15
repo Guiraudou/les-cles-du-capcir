@@ -35,6 +35,7 @@ class Booking
 		$guestLastname  = trim($input['guest_lastname'] ?? '');
 		$guestEmail     = trim($input['guest_email'] ?? '');
 		$guestPhone     = trim($input['guest_phone'] ?? '');
+		$guestCountry   = strtoupper(trim($input['guest_country'] ?? 'FR'));
 
 		if (empty($apartmentId) || !is_numeric($apartmentId)) {
 			throw new Exception('Appartement invalide');
@@ -48,6 +49,9 @@ class Booking
 		if (!filter_var($guestEmail, FILTER_VALIDATE_EMAIL)) {
 			throw new Exception('Email invalide');
 		}
+		if (empty($guestCountry)) {
+			throw new Exception('Pays obligatoire');
+		}
 
 		return [
 			'apartment_id'    => (int)$apartmentId,
@@ -57,6 +61,7 @@ class Booking
 			'guest_lastname'  => $guestLastname,
 			'guest_email'     => $guestEmail,
 			'guest_phone'     => $guestPhone,
+			'guest_country'   => $guestCountry,
 			'titre'           => $titreBien,
 		];
 	}
@@ -165,7 +170,7 @@ class Booking
 	public static function createReservation(
 		int $apartmentId, string $dateFrom, string $dateTo,
 		string $firstName, string $lastName, string $guestEmail, string $guestPhone,
-		float $prixTotal, float $acompte
+		float $prixTotal, float $acompte, string $guestCountry = 'FR'
 	): int {
 		$bookingData = [
 			'arrivalDate'      => $dateFrom,
@@ -175,6 +180,7 @@ class Booking
 			'lastName'         => $lastName,
 			'email'            => $guestEmail,
 			'phone'            => $guestPhone,
+			'country'          => $guestCountry ?: 'FR',
 			'adults'           => 1,
 			'price'            => $prixTotal,   // Prix total majoré
 			'priceStatus'      => 0,             // Pas encore entièrement payé
@@ -338,6 +344,7 @@ class Booking
 		$guestName   = trim("{$firstName} {$lastName}");
 		$guestEmail  = $session->metadata->guest_email ?? $session->customer_email ?? '';
 		$guestPhone  = $session->metadata->guest_phone ?? '';
+		$guestCountry = $session->metadata->guest_country ?? 'FR';
 		$nights      = $session->metadata->nights ?? 1;
 		$titreBien   = $session->metadata->titre ?? 'Séjour';
 		$acomptePaye = $session->amount_total / 100;
@@ -363,7 +370,7 @@ class Booking
 			$reservationId = self::createReservation(
 				(int) $apartmentId, $dateFrom, $dateTo,
 				$firstName, $lastName, $guestEmail, $guestPhone,
-				$prixTotal, $acomptePaye
+				$prixTotal, $acomptePaye, $guestCountry
 			);
 
 			$processedSessions[] = $session->id;
