@@ -1235,22 +1235,60 @@ function calendrierClicJour(dateStr) {
  * et le jour J+1 est libre → c'est la fin d'une réservation, le jour est réservable en arrivée.
  */
 function isCheckoutDay(dateStr, apartmentRates) {
-	const prev = new Date(dateStr);
-	prev.setDate(prev.getDate() - 1);
-	const prevStr = formatDateYMD(prev);
-
 	const next = new Date(dateStr);
 	next.setDate(next.getDate() + 1);
 	const nextStr = formatDateYMD(next);
 
-	const prevRate = apartmentRates[prevStr];
+	const rate     = apartmentRates[dateStr];
 	const nextRate = apartmentRates[nextStr];
 
-	// Jour de départ = la veille était occupée ET le lendemain est libre (ou absent)
-	const prevOccupied = prevRate && Number(prevRate.available) === 0;
+	// Jour de checkout = ce jour est available=0 ET le lendemain est libre (ou absent)
+	const thisOccupied = rate && Number(rate.available) === 0;
 	const nextFree     = !nextRate || Number(nextRate.available) === 1;
 
-	return prevOccupied && nextFree;
+	return thisOccupied && nextFree;
+}
+
+/**
+ * Détecte si un jour available=0 est au MILIEU d'un bloc (pas un checkout).
+ * C'est le cas si le lendemain est aussi available=0.
+ */
+function isMidBlockOccupied(dateStr, apartmentRates) {
+	const next = new Date(dateStr);
+	next.setDate(next.getDate() + 1);
+	const nextStr = formatDateYMD(next);
+	const nextRate = apartmentRates[nextStr];
+	return nextRate && Number(nextRate.available) === 0;
+}
+
+/**
+ * Détecte si un jour available=1 est en réalité dans un bloc occupé.
+ * Smoobu (Airbnb/Booking) peut marquer available=1 sur les derniers jours
+ * d'un séjour. On cherche un checkout day dans les 14 prochains jours :
+ * si on en trouve un sans croiser de jour vraiment libre (available=1
+ * qui n'est pas lui-même dans un bloc), ce jour est occupé.
+ */
+function isInsideOccupiedBlock(dateStr, apartmentRates) {
+	for (let i = 1; i <= 14; i++) {
+		const future = new Date(dateStr);
+		future.setDate(future.getDate() + i);
+		const futureStr = formatDateYMD(future);
+		const futureRate = apartmentRates[futureStr];
+
+		if (!futureRate) break;
+
+		if (Number(futureRate.available) === 0) {
+			if (isCheckoutDay(futureStr, apartmentRates)) {
+				// Checkout trouvé sans jour libre intercalé → on est dans le bloc
+				return true;
+			}
+			// Jour available=0 non-checkout (milieu de bloc) → on continue
+		} else {
+			// available=1 intercalé → on arrête, ce n'est pas un bloc contigu
+			break;
+		}
+	}
+	return false;
 }
 
 /**
@@ -1305,6 +1343,11 @@ function renderCalendrierDispo(ratesData, apartmentId, baseDate) {
 				cls = 'cal-inconnu';
 				title = 'Non disponible en ligne';
 			} else if (Number(rate.available) === 0 && !isCheckoutDay(dateStr, apartmentRates)) {
+				cls = 'cal-occupe';
+				title = 'Occupé';
+			} else if (Number(rate.available) === 1 && isInsideOccupiedBlock(dateStr, apartmentRates)) {
+				// Smoobu marque available=1 sur certains jours en fin de séjour (Airbnb/Booking)
+				// alors que la nuit est réellement occupée → on les bloque
 				cls = 'cal-occupe';
 				title = 'Occupé';
 			} else {
