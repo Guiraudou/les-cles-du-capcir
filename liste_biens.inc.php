@@ -52,7 +52,17 @@ $meta_description = $type === 'vente'
 		<!-- Filtres (location uniquement) -->
 		<div class="card listing mb-4 p-3">
 			<div class="row g-2 align-items-end">
-				<div class="col-12 col-sm-6 col-lg-3">
+				<!-- Dates -->
+				<div class="col-12 col-sm-6 col-lg-2">
+					<label for="filter-date-from" class="form-label small fw-bold mb-1"><i class="fa-solid fa-calendar-day me-1"></i>Arrivée</label>
+					<input type="date" id="filter-date-from" class="form-control form-control-sm" min="<?= date('Y-m-d') ?>">
+				</div>
+				<div class="col-12 col-sm-6 col-lg-2">
+					<label for="filter-date-to" class="form-label small fw-bold mb-1"><i class="fa-solid fa-calendar-day me-1"></i>Départ</label>
+					<input type="date" id="filter-date-to" class="form-control form-control-sm" min="<?= date('Y-m-d', strtotime('+1 day')) ?>">
+				</div>
+				<!-- Lieu -->
+				<div class="col-12 col-sm-6 col-lg-2">
 					<label for="filter-city" class="form-label small fw-bold mb-1">Lieu</label>
 					<select id="filter-city" class="form-select form-select-sm">
 						<option value="">Tous les lieux</option>
@@ -61,7 +71,8 @@ $meta_description = $type === 'vente'
 						<?php endforeach; ?>
 					</select>
 				</div>
-				<div class="col-12 col-sm-6 col-lg-3">
+				<!-- Capacité -->
+				<div class="col-12 col-sm-6 col-lg-2">
 					<label for="filter-personnes" class="form-label small fw-bold mb-1">Capacité</label>
 					<select id="filter-personnes" class="form-select form-select-sm">
 						<option value="0">Toutes capacités</option>
@@ -71,27 +82,40 @@ $meta_description = $type === 'vente'
 						<option value="8">Au moins 8 pers.</option>
 					</select>
 				</div>
-				<div class="col-12 col-sm-6 col-lg-3">
-					<label for="filter-chambres" class="form-label small fw-bold mb-1">Nombre de chambres</label>
+				<!-- Chambres -->
+				<div class="col-12 col-sm-6 col-lg-2">
+					<label for="filter-chambres" class="form-label small fw-bold mb-1">Chambres</label>
 					<select id="filter-chambres" class="form-select form-select-sm">
 						<option value="0">Toutes chambres</option>
-						<option value="1">Au moins 1 chambre</option>
-						<option value="2">Au moins 2 chambres</option>
-						<option value="3">Au moins 3 chambres</option>
-						<option value="4">Au moins 4 chambres</option>
+						<option value="1">Au moins 1</option>
+						<option value="2">Au moins 2</option>
+						<option value="3">Au moins 3</option>
+						<option value="4">Au moins 4</option>
 					</select>
 				</div>
-				<div class="col-12 col-sm-6 col-lg-3 d-flex align-items-end">
+				<!-- Boutons -->
+				<div class="col-12 col-sm-6 col-lg-2 d-flex align-items-end gap-2">
+					<button type="button" id="btn-recherche-dates" class="btn btn-sapin btn-sm flex-grow-1" disabled>
+						<i class="fa-solid fa-magnifying-glass"></i> Rechercher
+					</button>
 					<button type="button" id="reset-filters" class="btn btn-outline-secondary btn-sm">
-						<i class="fa-solid fa-xmark"></i> Effacer les filtres
+						<i class="fa-solid fa-xmark"></i>
 					</button>
 				</div>
 			</div>
+			<!-- Barre de statut -->
 			<div class="border-top mt-3 pt-2 text-center small text-muted">
 				<span id="filter-count"></span>
+				<span id="filter-loading" class="d-none">
+					<span class="spinner-border spinner-border-sm me-1" role="status"></span>
+					Vérification des disponibilités en cours…
+				</span>
 			</div>
 			<div id="no-results" class="alert alert-warning mt-3 mb-0 d-none">
 				<i class="fa-solid fa-triangle-exclamation"></i> Aucun bien ne correspond à ces critères.
+			</div>
+			<div id="filter-date-error" class="alert alert-danger mt-3 mb-0 d-none">
+				<i class="fa-solid fa-circle-exclamation"></i> <span id="filter-date-error-msg"></span>
 			</div>
 		</div>
 		<?php endif; ?>
@@ -107,7 +131,8 @@ $meta_description = $type === 'vente'
 					<div class="col-md-6 col-lg-4 filter-card"
 						data-city="<?= htmlspecialchars($bien['city'] ?? '') ?>"
 						data-personnes="<?= intval($bien['nb_personnes'] ?? 0) ?>"
-						data-chambres="<?= intval($bien['nb_chambres'] ?? 0) ?>">
+						data-chambres="<?= intval($bien['nb_chambres'] ?? 0) ?>"
+						data-smoobu-id="<?= intval($bien['id_smoobu'] ?? 0) ?>">
 						<div class="listing h-100">
 							<div class="listing-image-container">
 								<?php if (!empty($bien['images'])): ?>
@@ -189,70 +214,174 @@ $meta_description = $type === 'vente'
 <?php if ($type === 'location'): ?>
 <script>
 (function () {
-	const filterCity     = document.getElementById('filter-city');
+	const filterDateFrom  = document.getElementById('filter-date-from');
+	const filterDateTo    = document.getElementById('filter-date-to');
+	const filterCity      = document.getElementById('filter-city');
 	const filterPersonnes = document.getElementById('filter-personnes');
-	const filterChambres = document.getElementById('filter-chambres');
-	const resetBtn       = document.getElementById('reset-filters');
-	const countLabel     = document.getElementById('filter-count');
-	const noResults      = document.getElementById('no-results');
-	const cards          = document.querySelectorAll('.filter-card');
+	const filterChambres  = document.getElementById('filter-chambres');
+	const resetBtn        = document.getElementById('reset-filters');
+	const searchBtn       = document.getElementById('btn-recherche-dates');
+	const countLabel      = document.getElementById('filter-count');
+	const loadingEl       = document.getElementById('filter-loading');
+	const noResults       = document.getElementById('no-results');
+	const dateError       = document.getElementById('filter-date-error');
+	const dateErrorMsg    = document.getElementById('filter-date-error-msg');
+	const cards           = document.querySelectorAll('.filter-card');
 
+	// IDs Smoobu par carte (data-smoobu-id sur chaque carte)
+	// Ensemble des IDs disponibles après requête API (null = pas encore filtré par dates)
+	let disponiblesSmoobu = null;
+
+	// Active/désactive le bouton Rechercher selon les dates
+	function updateSearchBtn() {
+		const from = filterDateFrom ? filterDateFrom.value : '';
+		const to   = filterDateTo   ? filterDateTo.value   : '';
+		if (searchBtn) searchBtn.disabled = !(from && to && from < to);
+	}
+
+	// Applique les filtres locaux (ville, capacité, chambres) + dispo Smoobu si chargée
 	function applyFilters() {
-		const city     = filterCity ? filterCity.value : '';
+		const city      = filterCity      ? filterCity.value            : '';
 		const personnes = filterPersonnes ? parseInt(filterPersonnes.value) : 0;
-		const chambres  = filterChambres ? parseInt(filterChambres.value) : 0;
+		const chambres  = filterChambres  ? parseInt(filterChambres.value)  : 0;
 		let visible = 0;
 
 		cards.forEach(function (card) {
 			let show = true;
 
-			if (city && card.dataset.city !== city) {
-				show = false;
-			}
+			// Filtre ville
+			if (city && card.dataset.city !== city) show = false;
 
-			if (personnes > 0) {
-				const cardPersonnes = parseInt(card.dataset.personnes) || 0;
-				if (cardPersonnes < personnes) show = false;
-			}
+			// Filtre capacité
+			if (personnes > 0 && (parseInt(card.dataset.personnes) || 0) < personnes) show = false;
 
-			if (chambres > 0) {
-				const cardChambres = parseInt(card.dataset.chambres) || 0;
-				if (cardChambres < chambres) show = false;
+			// Filtre chambres
+			if (chambres > 0 && (parseInt(card.dataset.chambres) || 0) < chambres) show = false;
+
+			// Filtre dispo dates (si une recherche a été faite)
+			if (disponiblesSmoobu !== null) {
+				const smoobuId = parseInt(card.dataset.smoobuId) || 0;
+				if (smoobuId && !disponiblesSmoobu.includes(smoobuId)) show = false;
 			}
 
 			card.style.display = show ? '' : 'none';
 			if (show) visible++;
 		});
 
-		const isFiltered = (filterCity && filterCity.value) ||
+		const dateFrom = filterDateFrom ? filterDateFrom.value : '';
+		const dateTo   = filterDateTo   ? filterDateTo.value   : '';
+		const hasDateFilter = disponiblesSmoobu !== null && dateFrom && dateTo;
+		const hasOtherFilter = (filterCity && filterCity.value) ||
 			(filterPersonnes && parseInt(filterPersonnes.value) > 0) ||
 			(filterChambres && parseInt(filterChambres.value) > 0);
+		const isFiltered = hasDateFilter || hasOtherFilter;
 
 		if (countLabel) {
-			const label = visible + ' bien' + (visible !== 1 ? 's' : '');
-			countLabel.innerHTML = isFiltered
-				? '<i class="fa-solid fa-filter me-1"></i><strong>' + label + '</strong> selon ces critères'
-				: '<i class="fa-solid fa-house me-1"></i><strong>' + label + '</strong> disponible' + (visible !== 1 ? 's' : '');
+			const label = '<strong>' + visible + ' bien' + (visible !== 1 ? 's' : '') + '</strong>';
+			if (hasDateFilter) {
+				const d1 = new Date(dateFrom + 'T00:00:00').toLocaleDateString('fr-FR', {day:'2-digit', month:'short'});
+				const d2 = new Date(dateTo   + 'T00:00:00').toLocaleDateString('fr-FR', {day:'2-digit', month:'short'});
+				countLabel.innerHTML = '<i class="fa-solid fa-check-circle text-success me-1"></i>' + label + ' disponible' + (visible !== 1 ? 's' : '') + ' du ' + d1 + ' au ' + d2;
+			} else if (isFiltered) {
+				countLabel.innerHTML = '<i class="fa-solid fa-filter me-1"></i>' + label + ' selon ces critères';
+			} else {
+				countLabel.innerHTML = '<i class="fa-solid fa-house me-1"></i>' + label + ' disponible' + (visible !== 1 ? 's' : '');
+			}
 		}
-		if (noResults) {
-			noResults.classList.toggle('d-none', visible > 0);
+		if (noResults) noResults.classList.toggle('d-none', visible > 0);
+	}
+
+	// Recherche de dispo via API
+	async function rechercherDispos() {
+		const dateFrom = filterDateFrom ? filterDateFrom.value : '';
+		const dateTo   = filterDateTo   ? filterDateTo.value   : '';
+
+		if (!dateFrom || !dateTo || dateFrom >= dateTo) return;
+
+		// Cacher l'erreur précédente
+		if (dateError) dateError.classList.add('d-none');
+
+		// Afficher loader
+		if (loadingEl)  loadingEl.classList.remove('d-none');
+		if (countLabel) countLabel.textContent = '';
+		if (searchBtn)  searchBtn.disabled = true;
+
+		try {
+			const params = new URLSearchParams({ date_from: dateFrom, date_to: dateTo });
+			const resp = await fetch('api/biens_dispos.php?' + params.toString());
+			const data = await resp.json();
+
+			if (!data.success) {
+				throw new Error(data.error || 'Erreur serveur');
+			}
+
+			disponiblesSmoobu = data.disponibles || [];
+			applyFilters();
+
+		} catch (e) {
+			if (dateError && dateErrorMsg) {
+				dateErrorMsg.textContent = e.message || 'Impossible de vérifier les disponibilités. Réessayez.';
+				dateError.classList.remove('d-none');
+			}
+			disponiblesSmoobu = null;
+			applyFilters();
+		} finally {
+			if (loadingEl) loadingEl.classList.add('d-none');
+			updateSearchBtn();
 		}
 	}
 
-	if (filterCity)     filterCity.addEventListener('change', applyFilters);
+	// Écouteurs filtres locaux
+	if (filterCity)      filterCity.addEventListener('change', applyFilters);
 	if (filterPersonnes) filterPersonnes.addEventListener('change', applyFilters);
-	if (filterChambres) filterChambres.addEventListener('change', applyFilters);
+	if (filterChambres)  filterChambres.addEventListener('change', applyFilters);
 
+	// Écouteurs dates → active/désactive le bouton
+	if (filterDateFrom) {
+		filterDateFrom.addEventListener('change', function () {
+			// Ajuster le min du départ
+			if (filterDateTo && this.value) {
+				const nextDay = new Date(this.value + 'T00:00:00');
+				nextDay.setDate(nextDay.getDate() + 1);
+				filterDateTo.min = nextDay.toISOString().split('T')[0];
+				if (filterDateTo.value && filterDateTo.value <= this.value) {
+					filterDateTo.value = nextDay.toISOString().split('T')[0];
+				}
+			}
+			// Si on change les dates, reset les dispos
+			disponiblesSmoobu = null;
+			applyFilters();
+			updateSearchBtn();
+		});
+	}
+	if (filterDateTo) {
+		filterDateTo.addEventListener('change', function () {
+			disponiblesSmoobu = null;
+			applyFilters();
+			updateSearchBtn();
+		});
+	}
+
+	// Bouton Rechercher
+	if (searchBtn) searchBtn.addEventListener('click', rechercherDispos);
+
+	// Reset
 	if (resetBtn) {
 		resetBtn.addEventListener('click', function () {
-			if (filterCity)     filterCity.value = '';
+			if (filterDateFrom)  filterDateFrom.value  = '';
+			if (filterDateTo)    filterDateTo.value    = '';
+			if (filterCity)      filterCity.value      = '';
 			if (filterPersonnes) filterPersonnes.value = '0';
-			if (filterChambres) filterChambres.value = '0';
+			if (filterChambres)  filterChambres.value  = '0';
+			if (dateError)       dateError.classList.add('d-none');
+			disponiblesSmoobu = null;
+			updateSearchBtn();
 			applyFilters();
 		});
 	}
 
-	// Compteur initial
+	// Init
+	updateSearchBtn();
 	applyFilters();
 })();
 </script>

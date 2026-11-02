@@ -55,6 +55,27 @@
 							<label class="form-label fw-semibold">Téléphone</label>
 							<input type="tel" id="booking-guest-phone" class="form-control" placeholder="+33 6 00 00 00 00">
 						</div>
+						<div class="col-12">
+							<label class="form-label fw-semibold">Pays <span class="text-danger">*</span></label>
+							<select id="booking-guest-country" class="form-select">
+								<option value="">-- Sélectionnez votre pays --</option>
+								<option value="FR" selected>France</option>
+								<option value="ES">Espagne</option>
+								<option value="BE">Belgique</option>
+								<option value="CH">Suisse</option>
+								<option value="LU">Luxembourg</option>
+								<option value="DE">Allemagne</option>
+								<option value="GB">Royaume-Uni</option>
+								<option value="IT">Italie</option>
+								<option value="NL">Pays-Bas</option>
+								<option value="PT">Portugal</option>
+								<option value="AD">Andorre</option>
+								<option value="US">États-Unis</option>
+								<option value="CA">Canada</option>
+								<option value="AU">Australie</option>
+								<option value="OTHER">Autre</option>
+							</select>
+						</div>
 					</div>
 
 					<div id="booking-error" class="alert alert-danger mb-3" style="display:none;"></div>
